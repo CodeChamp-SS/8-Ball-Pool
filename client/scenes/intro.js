@@ -96,13 +96,13 @@ export default class Scene_8BallPool extends Phaser.Scene {
         ball.displayHeight = 45
         ball.displayWidth = 45
         if(key == 'ball_16') {
-            ball.setVelocity(20, 0);
-            ball.setAngularVelocity(20)
+            ball.setVelocity(50, 0);
+            ball.setAngularVelocity(5)
         }
         else ball.setVelocity(0, 0);
         // ball.setAngularVelocity(0.1);
-        ball.setBounce(1);
-        ball.setFriction(0, 0.005, 0 );
+        ball.setBounce(0.9);
+        ball.setFriction(0, 0.005, 0.1 );
         // ball.setOrigin(0, 0)
     }
 
@@ -140,6 +140,49 @@ export default class Scene_8BallPool extends Phaser.Scene {
         // game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         // game.scale.pageAlignHorizontally = true;
         // game.scale.pageAlignVertically = true;
+
+        let cushion1 = this.matter.add.image(415, 55, 'platform');
+        cushion1.setVisible(false)
+        cushion1.setBounce(0.9)
+        cushion1.setStatic(true)
+        cushion1.setFrictionStatic(0.1)
+        cushion1.displayHeight = 65
+        cushion1.displayWidth = 540
+        let cushion2 = this.matter.add.image(1045, 55, 'platform');
+        cushion2.setVisible(false)
+        cushion2.setStatic(true)
+        cushion2.setBounce(0.9)
+        cushion2.setFrictionStatic(0.1)
+        cushion2.displayHeight = 65
+        cushion2.displayWidth = 540
+        let cushion3 = this.matter.add.image(1380, 390, 'platform');
+        cushion3.setVisible(false)
+        cushion3.setStatic(true)
+        cushion3.setBounce(0.9)
+        cushion3.setFrictionStatic(0.1)
+        cushion3.displayHeight = 505
+        cushion3.displayWidth = 60
+        let cushion4 = this.matter.add.image(65, 390, 'platform');
+        cushion4.setVisible(false)
+        cushion4.setStatic(true)
+        cushion4.setBounce(0.9)
+        cushion4.setFrictionStatic(0.1)
+        cushion4.displayHeight = 505
+        cushion4.displayWidth = 60
+        let cushion5 = this.matter.add.image(415, 725, 'platform');
+        cushion5.setVisible(false)
+        cushion5.setStatic(true)
+        cushion5.setBounce(0.9)
+        cushion5.setFrictionStatic(0.1)
+        cushion5.displayHeight = 65
+        cushion5.displayWidth = 540
+        let cushion6 = this.matter.add.image(1045, 725, 'platform');
+        cushion6.setVisible(false)
+        cushion6.setStatic(true)
+        cushion6.setBounce(0.9)
+        cushion6.setFrictionStatic(0.1)
+        cushion6.displayHeight = 65
+        cushion6.displayWidth = 540
 
         this.createBalls()
 
