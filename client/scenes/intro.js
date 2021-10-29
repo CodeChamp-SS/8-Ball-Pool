@@ -91,11 +91,14 @@ export default class Scene_8BallPool extends Phaser.Scene {
         let ball = this.matter.add.image(x, y, key)
         ball.setBody({
             type: 'circle',
-            radius: 65,
+            radius: 70,
         });
         ball.displayHeight = 45
         ball.displayWidth = 45
-        if(key == 'ball_16') ball.setVelocity(20, 0);
+        if(key == 'ball_16') {
+            ball.setVelocity(20, 0);
+            ball.setAngularVelocity(20)
+        }
         else ball.setVelocity(0, 0);
         // ball.setAngularVelocity(0.1);
         ball.setBounce(1);
@@ -125,7 +128,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
     create() {
         let board = this.add.image(0, 0, 'board');
         board.setOrigin(0, 0)
-        this.add.physics
         board.displayWidth = this.sys.canvas.width
         board.displayHeight = this.sys.canvas.height
 
