@@ -1,5 +1,3 @@
-import Ball from '../model/ball.js'
-
 export default class Scene_8BallPool extends Phaser.Scene {
     constructor() {
         super("Scene_8BallPool");
@@ -83,11 +81,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
     }
 
     createBall(x, y, key) {
-        // todo: create sprite for the ball
-        //       setOrigin(0, 0)
-        //       displayHeight = 60
-        //       displayWidth = 60
-
         let ball = this.matter.add.image(x, y, key)
         ball.setBody({
             type: 'circle',
@@ -96,14 +89,12 @@ export default class Scene_8BallPool extends Phaser.Scene {
         ball.displayHeight = 45
         ball.displayWidth = 45
         if(key == 'ball_16') {
-            ball.setVelocity(50, 0);
+            ball.setVelocity(80, 0);
             ball.setAngularVelocity(5)
         }
         else ball.setVelocity(0, 0);
-        // ball.setAngularVelocity(0.1);
         ball.setBounce(0.9);
-        ball.setFriction(0, 0.005, 0.1 );
-        // ball.setOrigin(0, 0)
+        ball.setFriction(0, 0.008, 0.1 );
     }
 
     createBalls() {
@@ -141,7 +132,11 @@ export default class Scene_8BallPool extends Phaser.Scene {
         // game.scale.pageAlignHorizontally = true;
         // game.scale.pageAlignVertically = true;
 
-        let cushion1 = this.matter.add.image(415, 55, 'platform');
+        let cushion1 = this.matter.add.image(410, 55, 'platform');
+        cushion1.setBody({
+            type: 'trapezoid',
+            slope: -0.1
+        })
         cushion1.setVisible(false)
         cushion1.setBounce(0.9)
         cushion1.setStatic(true)
@@ -149,6 +144,10 @@ export default class Scene_8BallPool extends Phaser.Scene {
         cushion1.displayHeight = 65
         cushion1.displayWidth = 540
         let cushion2 = this.matter.add.image(1045, 55, 'platform');
+        cushion2.setBody({
+            type: 'trapezoid',
+            slope: -0.1
+        })
         cushion2.setVisible(false)
         cushion2.setStatic(true)
         cushion2.setBounce(0.9)
@@ -156,6 +155,11 @@ export default class Scene_8BallPool extends Phaser.Scene {
         cushion2.displayHeight = 65
         cushion2.displayWidth = 540
         let cushion3 = this.matter.add.image(1380, 390, 'platform');
+        cushion3.setBody({
+            type: 'trapezoid',
+            slope: -0.2
+        })
+        cushion3.setRotation(Math.PI/2)
         cushion3.setVisible(false)
         cushion3.setStatic(true)
         cushion3.setBounce(0.9)
@@ -163,47 +167,45 @@ export default class Scene_8BallPool extends Phaser.Scene {
         cushion3.displayHeight = 505
         cushion3.displayWidth = 60
         let cushion4 = this.matter.add.image(65, 390, 'platform');
+        cushion4.setBody({
+            type: 'trapezoid',
+            slope: 0.2
+        })
+        cushion4.setRotation(Math.PI/2)
         cushion4.setVisible(false)
         cushion4.setStatic(true)
         cushion4.setBounce(0.9)
         cushion4.setFrictionStatic(0.1)
-        cushion4.displayHeight = 505
+        cushion4.displayHeight = 615
         cushion4.displayWidth = 60
-        let cushion5 = this.matter.add.image(415, 725, 'platform');
+        let cushion5 = this.matter.add.image(410, 725, 'platform');
+        cushion5.setBody({
+            type: 'trapezoid',
+            slope: 0.1,
+        })
         cushion5.setVisible(false)
         cushion5.setStatic(true)
         cushion5.setBounce(0.9)
         cushion5.setFrictionStatic(0.1)
         cushion5.displayHeight = 65
-        cushion5.displayWidth = 540
+        cushion5.displayWidth = 595
         let cushion6 = this.matter.add.image(1045, 725, 'platform');
+        cushion6.setBody({
+            type: 'trapezoid',
+            slope: 0.1
+        })
         cushion6.setVisible(false)
         cushion6.setStatic(true)
         cushion6.setBounce(0.9)
         cushion6.setFrictionStatic(0.1)
         cushion6.displayHeight = 65
-        cushion6.displayWidth = 540
+        cushion6.displayWidth = 595
 
         this.createBalls()
 
         // let cue = this.matter.add.image(250, 370, 'cue')
         // cue.setOrigin(0, 0)
 
-        // var particles = this.add.particles('red');
-        //
-        // var emitter = particles.createEmitter({
-        //     speed: 200,
-        //     scale: { start: 1, end: 0 },
-        //     blendMode: 'ADD'
-        // });
-        //
-        // var logo = this.physics.add.image(400, 100, 'logo');
-        //
-        // logo.setVelocity(100, 200);
-        // logo.setBounce(1, 1);
-        // logo.setCollideWorldBounds(true);
-        //
-        // emitter.startFollow(logo);
     }
 
 }
