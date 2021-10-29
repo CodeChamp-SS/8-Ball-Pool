@@ -1,4 +1,6 @@
- export default class Scene_8BallPool extends Phaser.Scene {
+import Ball from '../model/ball.js'
+
+export default class Scene_8BallPool extends Phaser.Scene {
     constructor() {
         super("Scene_8BallPool");
     }
@@ -80,82 +82,70 @@
         );
     }
 
+    createBall(x, y, key) {
+        // todo: create sprite for the ball
+        //       setOrigin(0, 0)
+        //       displayHeight = 60
+        //       displayWidth = 60
+
+        let ball = this.matter.add.image(x, y, key)
+        ball.setBody({
+            type: 'circle',
+            radius: 65,
+        });
+        ball.displayHeight = 45
+        ball.displayWidth = 45
+        if(key == 'ball_16') ball.setVelocity(20, 0);
+        else ball.setVelocity(0, 0);
+        // ball.setAngularVelocity(0.1);
+        ball.setBounce(1);
+        ball.setFriction(0, 0.005, 0 );
+        // ball.setOrigin(0, 0)
+    }
+
+    createBalls() {
+        this.createBall(950, 350, 'ball_1')
+        this.createBall(1000, 320, 'ball_2')
+        this.createBall(1050, 290, 'ball_3')
+        this.createBall(1100, 260, 'ball_4')
+        this.createBall(1150, 230, 'ball_12')
+        this.createBall(1000, 380, 'ball_9')
+        this.createBall(1050, 410, 'ball_10')
+        this.createBall(1100, 440, 'ball_11')
+        this.createBall(1150, 470, 'ball_5')
+        this.createBall(1052, 350, 'ball_8')
+        this.createBall(1102, 320, 'ball_14')
+        this.createBall(1152, 290, 'ball_6')
+        this.createBall(1102, 380, 'ball_7')
+        this.createBall(1152, 410, 'ball_13')
+        this.createBall(1152, 350, 'ball_15')
+        this.createBall(342, 350, 'ball_16')
+    }
+
     create() {
         let board = this.add.image(0, 0, 'board');
         board.setOrigin(0, 0)
+        this.add.physics
         board.displayWidth = this.sys.canvas.width
         board.displayHeight = this.sys.canvas.height
+
+
+        // x: 95 y: 90
+        // width: 1355 height: 600
+        let boundary = this.matter.world.setBounds(35, 25, 1375, 730, 1)
+        boundary.disableGravity();
+        boundary.getAllBodies().forEach(body => {
+            body.restitution = 0.8
+        })
 
         // game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         // game.scale.pageAlignHorizontally = true;
         // game.scale.pageAlignVertically = true;
 
-        let ball_1 = this.physics.add.sprite(950, 350, 'ball_1')
-        ball_1.setOrigin(0, 0)
-        ball_1.displayHeight = 60
-        ball_1.displayWidth = 60
-        let ball_2 = this.physics.add.sprite(1000, 320, 'ball_2')
-        ball_2.setOrigin(0, 0)
-        ball_2.displayHeight = 60
-        ball_2.displayWidth = 60
-        let ball_3 = this.physics.add.sprite(1050, 290, 'ball_3')
-        ball_3.setOrigin(0, 0)
-        ball_3.displayHeight = 60
-        ball_3.displayWidth = 60
-        let ball_4 = this.physics.add.sprite(1100, 260, 'ball_4')
-        ball_4.setOrigin(0, 0)
-        ball_4.displayHeight = 60
-        ball_4.displayWidth = 60
-        let ball_12 = this.physics.add.sprite(1150, 230, 'ball_12')
-        ball_12.setOrigin(0, 0)
-        ball_12.displayHeight = 60
-        ball_12.displayWidth = 60
-        let ball_9 = this.physics.add.sprite(1000, 380, 'ball_9')
-        ball_9.setOrigin(0, 0)
-        ball_9.displayHeight = 60
-        ball_9.displayWidth = 60
-        let ball_10 = this.physics.add.sprite(1050, 410, 'ball_10')
-        ball_10.setOrigin(0, 0)
-        ball_10.displayHeight = 60
-        ball_10.displayWidth = 60
-        let ball_11 = this.physics.add.sprite(1100, 440, 'ball_11')
-        ball_11.setOrigin(0, 0)
-        ball_11.displayHeight = 60
-        ball_11.displayWidth = 60
-        let ball_5 = this.physics.add.sprite(1150, 470, 'ball_5')
-        ball_5.setOrigin(0, 0)
-        ball_5.displayHeight = 60
-        ball_5.displayWidth = 60
-        let ball_8 = this.physics.add.sprite(1052, 350, 'ball_8')
-        ball_8.setOrigin(0, 0)
-        ball_8.displayHeight = 60
-        ball_8.displayWidth = 60
-        let ball_14 = this.physics.add.sprite(1102, 320, 'ball_14')
-        ball_14.setOrigin(0, 0)
-        ball_14.displayHeight = 60
-        ball_14.displayWidth = 60
-        let ball_6 = this.physics.add.sprite(1152, 290, 'ball_6')
-        ball_6.setOrigin(0, 0)
-        ball_6.displayHeight = 60
-        ball_6.displayWidth = 60
-        let ball_7 = this.physics.add.sprite(1102, 380, 'ball_7')
-        ball_7.setOrigin(0, 0)
-        ball_7.displayHeight = 60
-        ball_7.displayWidth = 60
-        let ball_13 = this.physics.add.sprite(1152, 410, 'ball_13')
-        ball_13.setOrigin(0, 0)
-        ball_13.displayHeight = 60
-        ball_13.displayWidth = 60
-        let ball_15 = this.physics.add.sprite(1152, 350, 'ball_15')
-        ball_15.setOrigin(0, 0)
-        ball_15.displayHeight = 60
-        ball_15.displayWidth = 60
-        let ball_16 = this.physics.add.sprite(342, 350, 'ball_16')
-        ball_16.setOrigin(0, 0)
-        ball_16.displayHeight = 60
-        ball_16.displayWidth = 60
-        let cue = this.physics.add.sprite(250, 370, 'cue')
-        cue.setOrigin(0, 0)
+        this.createBalls()
+
+        // let cue = this.matter.add.image(250, 370, 'cue')
+        // cue.setOrigin(0, 0)
 
         // var particles = this.add.particles('red');
         //
@@ -173,7 +163,5 @@
         //
         // emitter.startFollow(logo);
     }
-    
-    
 
 }
