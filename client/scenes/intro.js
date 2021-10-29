@@ -136,9 +136,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
         // width: 1355 height: 600
         let boundary = this.matter.world.setBounds(35, 25, 1375, 730, 1)
         boundary.disableGravity();
-        boundary.getAllBodies().forEach(body => {
-            body.restitution = 0.8
-        })
 
         // game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         // game.scale.pageAlignHorizontally = true;
