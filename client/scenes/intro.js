@@ -4,10 +4,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
     }
 
     preload() {
-        // this.load.setBaseURL('http://labs.phaser.io');
-        // this.load.image('logo', 'assets/sprites/phaser3-logo.png');
-        // this.load.image('red', 'assets/particles/red.png');
-
         this.scale.scaleMode = Phaser.Scale.CENTER_BOTH;
         this.load.image('board', 'assets/table.png');
         this.load.spritesheet('ball_1',
@@ -81,20 +77,24 @@ export default class Scene_8BallPool extends Phaser.Scene {
     }
 
     createBall(x, y, key) {
-        let ball = this.matter.add.image(x, y, key)
+        let ball = this.matter.add.sprite(x, y, key)
         ball.setBody({
             type: 'circle',
             radius: 70,
         });
         ball.displayHeight = 45
         ball.displayWidth = 45
-        if(key == 'ball_16') {
-            ball.setVelocity(80, 0);
-            ball.setAngularVelocity(5)
-        }
-        else ball.setVelocity(0, 0);
         ball.setBounce(0.9);
-        ball.setFriction(0, 0.008, 0.1 );
+        ball.setFriction(0, 0.008, 0.1);
+        if (key === 'ball_16') {
+            ball.setVelocity(20, 0);
+            ball.setAngularVelocity(0)
+            this.cueBall = ball
+        } else ball.setVelocity(0, 0);
+        // ball.setCollisionCategory(this.ballCategory)
+        // ball.setCollidesWith(this.ballCategory)
+        // let posv = ball.body.position
+        // let v1 = new Phaser.Math.Vector2(2, 5)
     }
 
     createBalls() {
@@ -128,10 +128,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
         let boundary = this.matter.world.setBounds(35, 25, 1375, 730, 1)
         boundary.disableGravity();
 
-        // game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-        // game.scale.pageAlignHorizontally = true;
-        // game.scale.pageAlignVertically = true;
-
         let cushion1 = this.matter.add.image(410, 55, 'platform');
         cushion1.setBody({
             type: 'trapezoid',
@@ -159,7 +155,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
             type: 'trapezoid',
             slope: -0.2
         })
-        cushion3.setRotation(Math.PI/2)
+        cushion3.setRotation(Math.PI / 2)
         cushion3.setVisible(false)
         cushion3.setStatic(true)
         cushion3.setBounce(0.9)
@@ -171,7 +167,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
             type: 'trapezoid',
             slope: 0.2
         })
-        cushion4.setRotation(Math.PI/2)
+        cushion4.setRotation(Math.PI / 2)
         cushion4.setVisible(false)
         cushion4.setStatic(true)
         cushion4.setBounce(0.9)
@@ -203,9 +199,28 @@ export default class Scene_8BallPool extends Phaser.Scene {
 
         this.createBalls()
 
-        // let cue = this.matter.add.image(250, 370, 'cue')
-        // cue.setOrigin(0, 0)
+        this.cursors = this.input.keyboard.createCursorKeys();
+        // this.ballCategory = this.matter.world.nextCategory();
+        // this.cueCategory = this.matter.world.nextCategory();
+
+        this.cue = this.matter.add.sprite(250, 370, 'cue')
+        this.cue.setBody({
+            type: 'trapezoid',
+            slope: 0.5
+        })
+        this.cue.setRotation(Math.PI / 2)
+        this.cue.setCollidesWith([])
 
     }
 
+    update() {
+        let ballPosition = this.cueBall.body.position
+        if (Math.abs(this.cueBall.body.velocity.x) > 1e-2 || Math.abs(this.cueBall.body.velocity.y) > 1e-2) {
+            this.cue.setVisible(false)
+            this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 420, ballPosition.y))
+        } else this.cue.setVisible(true)
+
+        if (this.cursors.left.isDown) this.matter.body.rotate(this.cue.body, -Math.PI / 180, this.matter.vector.create(ballPosition.x, ballPosition.y))
+        else if (this.cursors.right.isDown) this.matter.body.rotate(this.cue.body, Math.PI / 180, this.matter.vector.create(ballPosition.x, ballPosition.y))
+    }
 }
