@@ -1,6 +1,10 @@
+// import {type} from "@colyseus/schema";
+
 export default class Scene_8BallPool extends Phaser.Scene {
     constructor() {
         super("Scene_8BallPool");
+        this.balls = []
+        this.pockets = []
     }
 
     preload() {
@@ -87,10 +91,11 @@ export default class Scene_8BallPool extends Phaser.Scene {
         ball.setBounce(0.9);
         ball.setFriction(0, 0.008, 0.1);
         if (key === 'ball_16') {
-            ball.setVelocity(20, 0);
+            ball.setVelocity(30, 0);
             ball.setAngularVelocity(0)
             this.cueBall = ball
         } else ball.setVelocity(0, 0);
+        this.balls.push(ball)
         // ball.setCollisionCategory(this.ballCategory)
         // ball.setCollidesWith(this.ballCategory)
         // let posv = ball.body.position
@@ -114,6 +119,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.createBall(1152, 410, 'ball_13')
         this.createBall(1152, 350, 'ball_15')
         this.createBall(342, 350, 'ball_16')
+        // console.log(this.balls)
     }
 
     create() {
@@ -125,35 +131,35 @@ export default class Scene_8BallPool extends Phaser.Scene {
 
         // x: 95 y: 90
         // width: 1355 height: 600
-        let boundary = this.matter.world.setBounds(35, 25, 1375, 730, 1)
+        let boundary = this.matter.world.setBounds(35, 25, 1450, 730, 1)
         boundary.disableGravity();
 
-        let cushion1 = this.matter.add.image(410, 55, 'platform');
+        let cushion1 = this.matter.add.image(435, 55, 'platform');          //top left
         cushion1.setBody({
             type: 'trapezoid',
-            slope: -0.1
+            slope: -0.15
         })
         cushion1.setVisible(false)
         cushion1.setBounce(0.9)
         cushion1.setStatic(true)
         cushion1.setFrictionStatic(0.1)
         cushion1.displayHeight = 65
-        cushion1.displayWidth = 540
-        let cushion2 = this.matter.add.image(1045, 55, 'platform');
+        cushion1.displayWidth = 575
+        let cushion2 = this.matter.add.image(1100, 55, 'platform');         //top right
         cushion2.setBody({
             type: 'trapezoid',
-            slope: -0.1
+            slope: -0.12
         })
         cushion2.setVisible(false)
         cushion2.setStatic(true)
         cushion2.setBounce(0.9)
         cushion2.setFrictionStatic(0.1)
         cushion2.displayHeight = 65
-        cushion2.displayWidth = 540
-        let cushion3 = this.matter.add.image(1380, 390, 'platform');
+        cushion2.displayWidth = 567
+        let cushion3 = this.matter.add.image(1455, 390, 'platform');        //right
         cushion3.setBody({
             type: 'trapezoid',
-            slope: -0.2
+            slope: -0.24
         })
         cushion3.setRotation(Math.PI / 2)
         cushion3.setVisible(false)
@@ -162,7 +168,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         cushion3.setFrictionStatic(0.1)
         cushion3.displayHeight = 505
         cushion3.displayWidth = 60
-        let cushion4 = this.matter.add.image(65, 390, 'platform');
+        let cushion4 = this.matter.add.image(60, 390, 'platform');      //left
         cushion4.setBody({
             type: 'trapezoid',
             slope: 0.2
@@ -172,30 +178,30 @@ export default class Scene_8BallPool extends Phaser.Scene {
         cushion4.setStatic(true)
         cushion4.setBounce(0.9)
         cushion4.setFrictionStatic(0.1)
-        cushion4.displayHeight = 615
-        cushion4.displayWidth = 60
-        let cushion5 = this.matter.add.image(410, 725, 'platform');
+        cushion4.displayHeight = 640
+        cushion4.displayWidth = 70
+        let cushion5 = this.matter.add.image(432, 725, 'platform');     //bottom left
         cushion5.setBody({
             type: 'trapezoid',
-            slope: 0.1,
+            slope: 0.15,
         })
         cushion5.setVisible(false)
         cushion5.setStatic(true)
         cushion5.setBounce(0.9)
         cushion5.setFrictionStatic(0.1)
         cushion5.displayHeight = 65
-        cushion5.displayWidth = 595
-        let cushion6 = this.matter.add.image(1045, 725, 'platform');
+        cushion5.displayWidth = 665
+        let cushion6 = this.matter.add.image(1103, 725, 'platform');        //bottom right
         cushion6.setBody({
             type: 'trapezoid',
-            slope: 0.1
+            slope: 0.15
         })
         cushion6.setVisible(false)
         cushion6.setStatic(true)
         cushion6.setBounce(0.9)
         cushion6.setFrictionStatic(0.1)
         cushion6.displayHeight = 65
-        cushion6.displayWidth = 595
+        cushion6.displayWidth = 663
 
         this.createBalls()
 
@@ -211,6 +217,33 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.cue.setRotation(Math.PI / 2)
         this.cue.setCollidesWith([])
 
+        let pocket_1 = this.matter.add.sprite(80, 72, 'pocket_1')       //top left
+        let pocket_2 = this.matter.add.sprite(768, 59, 'pocket_2')      //top centre
+        let pocket_3 = this.matter.add.sprite(1449, 70, 'pocket_3')     //top right
+        let pocket_4 = this.matter.add.sprite(80, 709, 'pocket_4')      //bottom left
+        let pocket_5 = this.matter.add.sprite(1449, 709, 'pocket_5')    //bottom centre
+        let pocket_6 = this.matter.add.sprite(768, 725, 'pocket_6')     //bottom right
+        /*this.pocket_1.setStatic(true)
+        this.pocket_2.setStatic(true)
+        this.pocket_3.setStatic(true)
+        this.pocket_4.setStatic(true)
+        this.pocket_5.setStatic(true)
+        this.pocket_6.setStatic(true)*/
+        // this.pockets = []
+        this.pockets.push(pocket_1)
+        this.pockets.push(pocket_2)
+        this.pockets.push(pocket_3)
+        this.pockets.push(pocket_4)
+        this.pockets.push(pocket_5)
+        this.pockets.push(pocket_6)
+        console.log(typeof this.pockets)
+        this.pockets.forEach((pocket) => {
+            pocket.setBody({
+                type: 'circle',
+                radius: 10,
+            });
+            pocket.setStatic(true)
+        })
     }
 
     update() {
