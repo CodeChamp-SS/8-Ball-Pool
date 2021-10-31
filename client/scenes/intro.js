@@ -328,11 +328,16 @@ export default class Scene_8BallPool extends Phaser.Scene {
         let foul = this.sound.add('foul', {loop: false})
         let pocket = this.sound.add('pocket', {loop: false})
 
+        this.cueSpeed = 0
+
+        this.input.on('pointerdown', this.startDrag, this)
+        this.input.on('pointerup', this.onRelease, this);
+
         this.matter.world.on("collisionstart", (event) => {
             event.pairs.forEach((pair) => {
                 const {bodyA, bodyB} = pair;
-                console.log(bodyA.collisionFilter.mask)
-                console.log(bodyB.collisionFilter.mask)
+                // console.log(bodyA.collisionFilter.mask)
+                // console.log(bodyB.collisionFilter.mask)
                 if (bodyA.collisionFilter.mask === potMask) {
                     if (bodyB.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask) {
                         let ball = bodyB.gameObject
@@ -343,6 +348,11 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         if (index !== -1) {
                             this.balls.splice(index, 1);
                         }
+                    } else {
+                        foul.play()
+                        this.cueBall.setVelocity(0, 0)
+                        this.cueBall.setToSleep().setInteractive().setVisible(false)
+                        this.cue.setToSleep()
                     }
                 } else if (bodyB.collisionFilter.mask === potMask) {
                     if (bodyA.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask) {
@@ -353,7 +363,13 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         let index = this.balls.indexOf(ball);
                         if (index !== -1) {
                             this.balls.splice(index, 1);
+                            this.input.on('pointerDown', this.startDrag, this)
                         }
+                    } else {
+                        foul.play()
+                        this.cueBall.setVelocity(0, 0)
+                        this.cueBall.setToSleep().setInteractive().setVisible(false)
+                        this.cue.setToSleep()
                     }
                 } else if (bodyA.collisionFilter.mask === cushion1.body.collisionFilter.mask || bodyB.collisionFilter.mask === cushion1.body.collisionFilter.mask) {
                     cushionCollision.play()
@@ -364,9 +380,48 @@ export default class Scene_8BallPool extends Phaser.Scene {
         });
     }
 
+    startDrag(pointer, targets) {
+        this.input.off('pointerdown', this.startDrag, this);
+        this.dragTarget = targets[0]
+        if (pointer !== undefined) {
+            this.input.on('pointermove', this.doDrag, this);
+            this.input.on('pointerup', this.stopDrag, this);
+        }
+    }
+
+    doDrag(pointer) {
+        this.dragTarget.x = pointer.x;
+        this.dragTarget.y = pointer.y;
+        this.matter.body.setPosition(this.cue.body, this.matter.vector.create(this.cueBall.body.position.x - 420, this.cueBall.body.position.y))
+    }
+
+    stopDrag() {
+        this.input.on('pointerdown', this.startDrag, this);
+        this.input.off('pointermove', this.doDrag, this);
+        this.input.off('pointerup', this.stopDrag, this);
+        this.matter.body.setPosition(this.cue.body, this.matter.vector.create(this.cueBall.body.position.x - 420, this.cueBall.body.position.y))
+    }
+
+    onRelease(pointer) {
+        if (pointer.leftButtonReleased()) {
+            console.log('Left Button was released', this.cueSpeed);
+            if (this.cueSpeed > 0) {
+            }
+        }
+    }
+
     update() {
+        // if (!this.cueBall.active && !this.cueBall.visible) {
+        //     this.cueBall.setPosition(342, 350)
+        //     this.cueBall.setVelocity(0, 0)
+        //     this.matter.body.setPosition(this.cue.body, this.matter.vector.create(this.cueBall.body.position.x - 420, this.cueBall.body.position.y))
+        // }
+
         let ballPosition = this.cueBall.body.position
         let moveCue = false
+
+        let pointer = this.input.activePointer;
+        // if(pointer.isDown) console.log("power increasing")
 
         this.balls.forEach(ball => {
             if (Math.abs(ball.body.velocity.x) > 1e-2 || Math.abs(ball.body.velocity.y) > 1e-2) {
@@ -377,6 +432,13 @@ export default class Scene_8BallPool extends Phaser.Scene {
             this.cue.setVisible(false)
             this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 420, ballPosition.y))
         } else {
+            // this.cueBall.setActive(true).setVisible(true)
+            if (!this.cueBall.visible) {
+                this.cueBall.setPosition(342, 350)
+                this.matter.body.setPosition(this.cue.body, this.matter.vector.create(-100, this.cueBall.body.position.y))
+                this.cue.setAwake()
+                this.cueBall.setVisible(true).setAwake()
+            }
             let cuePosition = this.cue.body.position
             let velocityVector = new Phaser.Math.Vector2(ballPosition.x - cuePosition.x, ballPosition.y - cuePosition.y)
             let angle = velocityVector.angle() + Math.PI / 2
@@ -386,7 +448,9 @@ export default class Scene_8BallPool extends Phaser.Scene {
             else if (this.cursors.right.isDown) this.matter.body.rotate(this.cue.body, Math.PI / 180, this.matter.vector.create(ballPosition.x, ballPosition.y))
             else if (this.cursors.down.isDown) {
                 console.log("power increasing")
-                this.matter.applyForceFromAngle(this.cue.body, 0.2, angle - Math.PI / 2)
+                this.matter.applyForceFromAngle(this.cue.body, 1, angle - Math.PI / 2)
+                this.cueBall.disableInteractive()
+                this.cueSpeed += 1
             }
         }
     }
