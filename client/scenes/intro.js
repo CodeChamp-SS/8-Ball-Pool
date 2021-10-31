@@ -74,6 +74,12 @@ export default class Scene_8BallPool extends Phaser.Scene {
             'assets/cue.png',
             {frameWidth: 694, frameHeight: 20}
         );
+        this.load.audio('ball_collision', ['assets/sounds/ball_collision.mp3'])
+        this.load.audio('cushion_collision', ['assets/sounds/cushion_collision.mp3'])
+        this.load.audio('foul', ['assets/sounds/foul.mp3'])
+        this.load.audio('pocket', ['assets/sounds/pocket.mp3'])
+        this.load.audio('cue_collision_strong', ['assets/sounds/cue_collision_strong.mp3'])
+        this.load.audio('cue_collision_weak', ['assets/sounds/cue_collision_weak.mp3'])
     }
 
     createBall(x, y, key) {
@@ -95,11 +101,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
             ball.setCollisionCategory(this.ballCategory)
         }
         this.balls.push(ball)
-
-        // ball.setCollisionCategory(this.ballCategory)
-        // ball.setCollidesWith(this.ballCategory)
-        // let posv = ball.body.position
-        // let v1 = new Phaser.Math.Vector2(2, 5)
     }
 
     createBalls() {
@@ -131,6 +132,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.cueCategory = this.matter.world.nextCategory();
         this.cueBallCategory = this.matter.world.nextCategory();
         this.cushionCategory = this.matter.world.nextCategory();
+        this.potCategory = this.matter.world.nextCategory()
 
         // x: 95 y: 90
         // width: 1355 height: 600
@@ -212,8 +214,82 @@ export default class Scene_8BallPool extends Phaser.Scene {
         cushion6.displayWidth = 595
         cushion6.setCollisionCategory(this.cushionCategory)
 
+        // pocket 1: 95, 85
+        // pocket 2: 730, 75
+        // pocket 3: 1355, 85
+        // pocket 4: 1350, 695
+        // pocket 5: 730, 705
+        // pocket 6: 95, 695
+        let pot1 = this.matter.add.image(70, 65, 'ball_1')
+        pot1.setBody({
+            type: 'circle',
+            radius: 70,
+        });
+        pot1.setVisible(false)
+        pot1.displayHeight = 45
+        pot1.displayWidth = 45
+        pot1.setStatic(true)
+        pot1.setCollisionCategory(this.potCategory)
+        let pot2 = this.matter.add.image(728, 40, 'ball_1')
+        pot2.setBody({
+            type: 'circle',
+            radius: 70,
+        });
+        pot2.setVisible(false)
+        pot2.setStatic(true)
+        pot2.displayHeight = 45
+        pot2.displayWidth = 45
+        pot2.setCollisionCategory(this.potCategory)
+        let pot3 = this.matter.add.image(1380, 65, 'ball_1')
+        pot3.setBody({
+            type: 'circle',
+            radius: 70,
+        });
+        pot3.setStatic(true)
+        pot3.setVisible(false)
+        pot3.displayHeight = 45
+        pot3.displayWidth = 45
+        pot3.setCollisionCategory(this.potCategory)
+        let pot4 = this.matter.add.image(1380, 710, 'ball_1')
+        pot4.setBody({
+            type: 'circle',
+            radius: 70,
+        });
+        pot4.setVisible(false)
+        pot4.setStatic(true)
+        pot4.displayHeight = 45
+        pot4.displayWidth = 45
+        pot4.setCollisionCategory(this.potCategory)
+        let pot5 = this.matter.add.image(728, 740, 'ball_1')
+        pot5.setBody({
+            type: 'circle',
+            radius: 70,
+        });
+        pot5.setVisible(false)
+        pot5.setStatic(true)
+        pot5.displayHeight = 45
+        pot5.displayWidth = 45
+        pot5.setCollisionCategory(this.potCategory)
+        let pot6 = this.matter.add.image(70, 710, 'ball_1')
+        pot6.setBody({
+            type: 'circle',
+            radius: 70,
+        });
+        pot6.setVisible(false)
+        pot6.setStatic(true)
+        pot6.displayHeight = 45
+        pot6.displayWidth = 45
+        pot6.setCollisionCategory(this.potCategory)
+
         this.balls = []
         this.createBalls()
+        pot1.setCollidesWith([this.ballCategory, this.cueBallCategory])
+        pot2.setCollidesWith([this.ballCategory, this.cueBallCategory])
+        pot3.setCollidesWith([this.ballCategory, this.cueBallCategory])
+        pot4.setCollidesWith([this.ballCategory, this.cueBallCategory])
+        pot5.setCollidesWith([this.ballCategory, this.cueBallCategory])
+        pot6.setCollidesWith([this.ballCategory, this.cueBallCategory])
+        let potMask = pot1.body.collisionFilter.mask
 
         this.cue = this.matter.add.sprite(250, 370, 'cue')
         this.cue.setBody({
@@ -225,6 +301,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.cue.setRotation(Math.PI / 2)
         this.cue.setCollisionCategory(this.cueCategory)
         this.cue.setCollidesWith([this.cueBallCategory])
+        let cueMask = this.cue.body.collisionFilter.mask
         let categories = [this.ballCategory, this.cueBallCategory, this.cushionCategory]
 
         cushion1.setCollidesWith(categories)
@@ -233,6 +310,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         cushion4.setCollidesWith(categories)
         cushion5.setCollidesWith(categories)
         cushion6.setCollidesWith(categories)
+        categories.push(this.potCategory)
         this.balls.forEach(ball => {
             ball.setCollidesWith(categories)
         })
@@ -243,6 +321,47 @@ export default class Scene_8BallPool extends Phaser.Scene {
 
         this.cursors = this.input.keyboard.createCursorKeys();
 
+        let ballCollision = this.sound.add('ball_collision', {loop: false})
+        let cueCollisionWeak = this.sound.add('cue_collision_weak', {loop: false})
+        let cueCollisionStrong = this.sound.add('cue_collision_strong', {loop: false})
+        let cushionCollision = this.sound.add('cushion_collision', {loop: false})
+        let foul = this.sound.add('foul', {loop: false})
+        let pocket = this.sound.add('pocket', {loop: false})
+
+        this.matter.world.on("collisionstart", (event) => {
+            event.pairs.forEach((pair) => {
+                const {bodyA, bodyB} = pair;
+                console.log(bodyA.collisionFilter.mask)
+                console.log(bodyB.collisionFilter.mask)
+                if (bodyA.collisionFilter.mask === potMask) {
+                    if (bodyB.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask) {
+                        let ball = bodyB.gameObject
+                        console.log(bodyB.gameObject)
+                        bodyB.gameObject.destroy()
+                        pocket.play()
+                        let index = this.balls.indexOf(ball);
+                        if (index !== -1) {
+                            this.balls.splice(index, 1);
+                        }
+                    }
+                } else if (bodyB.collisionFilter.mask === potMask) {
+                    if (bodyA.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask) {
+                        let ball = bodyA.gameObject
+                        console.log(bodyA.gameObject)
+                        bodyA.gameObject.destroy()
+                        pocket.play()
+                        let index = this.balls.indexOf(ball);
+                        if (index !== -1) {
+                            this.balls.splice(index, 1);
+                        }
+                    }
+                } else if (bodyA.collisionFilter.mask === cushion1.body.collisionFilter.mask || bodyB.collisionFilter.mask === cushion1.body.collisionFilter.mask) {
+                    cushionCollision.play()
+                } else if (bodyA.collisionFilter.mask === cueMask || bodyB.collisionFilter.mask === cueMask) {
+                    cueCollisionStrong.play()
+                } else ballCollision.play()
+            });
+        });
     }
 
     update() {
@@ -267,7 +386,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
             else if (this.cursors.right.isDown) this.matter.body.rotate(this.cue.body, Math.PI / 180, this.matter.vector.create(ballPosition.x, ballPosition.y))
             else if (this.cursors.down.isDown) {
                 console.log("power increasing")
-                this.matter.applyForceFromAngle(this.cue.body, 1, angle - Math.PI / 2)
+                this.matter.applyForceFromAngle(this.cue.body, 0.2, angle - Math.PI / 2)
             }
         }
     }
