@@ -316,9 +316,10 @@ export default class Scene_8BallPool extends Phaser.Scene {
             ball.setCollidesWith(categories)
         })
         categories.push(this.cueCategory)
+        this.cueBallCollidesWith = categories
         this.cueBall.setCollidesWith(categories)
 
-        this.matter.body.setPosition(this.cue.body, this.matter.vector.create(this.cueBall.body.position.x - 420, this.cueBall.body.position.y))
+        this.matter.body.setPosition(this.cue.body, this.matter.vector.create(this.cueBall.body.position.x - 410, this.cueBall.body.position.y))
 
         this.cursors = this.input.keyboard.createCursorKeys();
 
@@ -354,6 +355,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         this.cueBall.setVelocity(0, 0)
                         this.cueBall.setToSleep().setInteractive().setVisible(false)
                         this.cue.setToSleep()
+                        this.cueBall.setCollidesWith([])
                     }
                 } else if (bodyB.collisionFilter.mask === potMask) {
                     if (bodyA.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask) {
@@ -371,6 +373,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         this.cueBall.setVelocity(0, 0)
                         this.cueBall.setToSleep().setInteractive().setVisible(false)
                         this.cue.setToSleep()
+                        this.cueBall.setCollidesWith([])
                     }
                 } else if (bodyA.collisionFilter.mask === cushion1.body.collisionFilter.mask || bodyB.collisionFilter.mask === cushion1.body.collisionFilter.mask) {
                     cushionCollision.play()
@@ -380,12 +383,16 @@ export default class Scene_8BallPool extends Phaser.Scene {
             });
         });
 
+        this.graphics = this.add.graphics({lineStyle: {width: 4, color: 0xffffff}});
+        this.graphics.alpha = 0.4
         this.hit = false
+        this.moveLine = true
     }
 
     startDrag(pointer, targets) {
         this.input.off('pointerdown', this.startDrag, this);
         this.dragTarget = targets[0]
+        this.graphics.clear()
         this.input.on('pointermove', this.doDrag, this);
         this.input.on('pointerup', this.stopDrag, this);
     }
@@ -393,14 +400,19 @@ export default class Scene_8BallPool extends Phaser.Scene {
     doDrag(pointer) {
         this.dragTarget.x = pointer.x;
         this.dragTarget.y = pointer.y;
-        this.matter.body.setPosition(this.cue.body, this.matter.vector.create(this.cueBall.body.position.x - 420, this.cueBall.body.position.y))
+        this.matter.body.setPosition(this.cue.body, this.matter.vector.create(this.cueBall.body.position.x - 410, this.cueBall.body.position.y))
     }
 
     stopDrag() {
         this.input.on('pointerdown', this.startDrag, this);
         this.input.off('pointermove', this.doDrag, this);
         this.input.off('pointerup', this.stopDrag, this);
-        this.matter.body.setPosition(this.cue.body, this.matter.vector.create(this.cueBall.body.position.x - 420, this.cueBall.body.position.y))
+        let ballPosition = this.cueBall.body.position
+        this.graphics.clear()
+        // console.log(ballPosition.x, ballPosition.y)
+        this.line = new Phaser.Geom.Line(ballPosition.x, ballPosition.y, ballPosition.x + 1200, ballPosition.y)
+        this.graphics.strokeLineShape(this.line)
+        this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
     }
 
     onRelease(pointer) {
@@ -409,6 +421,10 @@ export default class Scene_8BallPool extends Phaser.Scene {
             if (this.cueSpeed > 0) {
             }
         }
+    }
+
+    f(x) {
+        return 50 / Math.pow(3, x) + 25
     }
 
     update() {
@@ -427,40 +443,68 @@ export default class Scene_8BallPool extends Phaser.Scene {
         let velocityVector = new Phaser.Math.Vector2(ballPosition.x - cuePosition.x, ballPosition.y - cuePosition.y)
         let angle = velocityVector.angle() + Math.PI / 2
         if (moveCue) {
+            this.moveLine = true
+            this.graphics.clear()
             this.cue.setVisible(false)
-            this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 420, ballPosition.y))
+            this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
         } else {
             if (!this.cueBall.visible) {
                 this.cueBall.setPosition(342, 350)
                 ballPosition = this.cueBall.body.position
-                this.matter.body.setPosition(this.cue.body, this.matter.vector.create(-100, this.cueBall.body.position.y))
+                this.matter.body.setPosition(this.cue.body, this.matter.vector.create(this.cueBall.body.position.x - 410, this.cueBall.body.position.y))
                 this.cue.setAwake()
                 this.cueBall.setVisible(true).setAwake()
+            }
+
+            // ballPosition.x + 1200, ballPosition.y
+            if (this.moveLine) {
+                ballPosition = this.cueBall.body.position
+                console.log(ballPosition.x, ballPosition.y)
+                this.line = new Phaser.Geom.Line(ballPosition.x, ballPosition.y, ballPosition.x + 1200, ballPosition.y)
+                this.graphics.strokeLineShape(this.line)
+                this.moveLine = false
             }
             this.cue.setVisible(true)
             this.cue.setRotation(angle)
         }
-        if (this.cursors.left.isDown) this.matter.body.rotate(this.cue.body, -Math.PI / 180, this.matter.vector.create(ballPosition.x, ballPosition.y))
-        else if (this.cursors.right.isDown) this.matter.body.rotate(this.cue.body, Math.PI / 180, this.matter.vector.create(ballPosition.x, ballPosition.y))
+        if (this.cursors.left.isDown) {
+            if (!moveCue) {
+                this.graphics.clear()
+                console.log(Phaser.Geom.Line.Angle(this.line))
+                Phaser.Geom.Line.RotateAroundXY(this.line, ballPosition.x, ballPosition.y, -Math.PI / 180)
+                console.log(Phaser.Geom.Line.Angle(this.line))
+                this.graphics.strokeLineShape(this.line)
+            }
+            this.matter.body.rotate(this.cue.body, -Math.PI / 180, this.matter.vector.create(ballPosition.x, ballPosition.y))
+        } else if (this.cursors.right.isDown) {
+            if (!moveCue) {
+                this.graphics.clear()
+                Phaser.Geom.Line.RotateAroundXY(this.line, ballPosition.x, ballPosition.y, Math.PI / 180)
+                this.graphics.strokeLineShape(this.line)
+            }
+            this.matter.body.rotate(this.cue.body, Math.PI / 180, this.matter.vector.create(ballPosition.x, ballPosition.y))
+        }
         if (this.cursors.down.isDown) {
             console.log("power increasing")
             this.hit = true
-            if (this.cursors.down.getDuration() <= 2500) {
+            if (this.cursors.down.getDuration() <= 2000) {
                 let v1 = new Phaser.Math.Vector2(this.cue.body.position)
                 v1.subtract(new Phaser.Math.Vector2(this.cueBall.body.position))
-                let velocityV = v1.normalize().scale(-2)
-                this.cue.setVelocity(-velocityV.x, -velocityV.y)
+                let velocityV = v1.normalize().scale(3)
+                this.cue.setVelocity(velocityV.x, velocityV.y)
             }
         }
         // console.log(this.hit)
         if (this.cursors.down.isUp && this.hit) {
             this.hit = false
             let duration = this.cursors.down.duration
-            duration = Math.min(duration, 2500)
+            duration = Math.min(duration, 2000)
             if (!moveCue) {
-                let speed = duration * 1.25 / 800
-                // console.log("speed = ", speed)
-                console.log(duration)
+                let speed = ((duration + this.f(duration)) * 1.25) / 600
+                speed = Math.min(speed, 4.5)
+                console.log("speed = ", speed)
+                // console.log(duration)
+                this.cueBall.setCollidesWith(this.cueBallCollidesWith)
                 this.cueBall.disableInteractive()
                 this.matter.applyForceFromAngle(this.cue.body, speed, angle - Math.PI / 2)
             }
