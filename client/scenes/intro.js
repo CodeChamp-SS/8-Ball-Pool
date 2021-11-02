@@ -433,12 +433,14 @@ export default class Scene_8BallPool extends Phaser.Scene {
 
         let pointer = this.input.activePointer;
         // if(pointer.isDown) console.log("power increasing")
+        this.circles = []
 
         this.balls.forEach(ball => {
             if (Math.abs(ball.body.velocity.x) > 1e-2 || Math.abs(ball.body.velocity.y) > 1e-2) {
                 moveCue = true
             }
         })
+
         let cuePosition = this.cue.body.position
         let velocityVector = new Phaser.Math.Vector2(ballPosition.x - cuePosition.x, ballPosition.y - cuePosition.y)
         let angle = velocityVector.angle() + Math.PI / 2
@@ -455,13 +457,20 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 this.cue.setAwake()
                 this.cueBall.setVisible(true).setAwake()
             }
-
             // ballPosition.x + 1200, ballPosition.y
+            this.balls.forEach(ball => {
+                if (ball.body.position !== ballPosition){
+                    let circle = new Phaser.Geom.Circle(ball.body.position.x, ball.body.position.y, 70)
+                    this.circles.push(circle)
+                }
+            })
+
             if (this.moveLine) {
                 ballPosition = this.cueBall.body.position
                 console.log(ballPosition.x, ballPosition.y)
                 this.line = new Phaser.Geom.Line(ballPosition.x, ballPosition.y, ballPosition.x + 1200, ballPosition.y)
                 this.graphics.strokeLineShape(this.line)
+
                 this.moveLine = false
             }
             this.cue.setVisible(true)
@@ -484,6 +493,27 @@ export default class Scene_8BallPool extends Phaser.Scene {
             }
             this.matter.body.rotate(this.cue.body, Math.PI / 180, this.matter.vector.create(ballPosition.x, ballPosition.y))
         }
+
+        let minDist = 1e9
+        let pt
+        this.circles.forEach(circle => {
+            let points = Phaser.Geom.Intersects.GetLineToCircle(this.line, circle)
+            // console.log(points)
+            if (points.length) {
+                if (Math.pow(points[0].x - ballPosition.x, 2) + Math.pow(points[0].y - ballPosition.y, 2) < minDist){
+                    minDist = Math.pow(points[0].x - ballPosition.x, 2) + Math.pow(points[0].y - ballPosition.y, 2)
+                    pt = points[0]
+                }
+            }
+        })
+        console.log(pt)
+        /*if (pt !== undefined) {
+            this.graphics.clear()
+            this.line.x2 = pt.x
+            this.line.y2 = pt.y
+            this.graphics.strokeLineShape(this.line)
+        }*/
+
         if (this.cursors.down.isDown) {
             console.log("power increasing")
             this.hit = true
