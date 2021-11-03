@@ -471,7 +471,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 console.log(ballPosition.x, ballPosition.y)
                 this.line = new Phaser.Geom.Line(ballPosition.x, ballPosition.y, ballPosition.x + 1200, ballPosition.y)
                 this.graphics.strokeLineShape(this.line)
-
                 this.moveLine = false
             }
             this.cue.setVisible(true)
@@ -480,9 +479,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         if (this.cursors.left.isDown) {
             if (!moveCue) {
                 this.graphics.clear()
-                console.log(Phaser.Geom.Line.Angle(this.line))
                 Phaser.Geom.Line.RotateAroundXY(this.line, ballPosition.x, ballPosition.y, -Math.PI / 180)
-                console.log(Phaser.Geom.Line.Angle(this.line))
                 this.graphics.strokeLineShape(this.line)
             }
             this.matter.body.rotate(this.cue.body, -Math.PI / 180, this.matter.vector.create(ballPosition.x, ballPosition.y))
@@ -503,7 +500,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
         })*/
         this.circles.forEach(circle => {
             let points = Phaser.Geom.Intersects.GetLineToCircle(this.line, circle)
-            // console.log(points[0])
             if (points.length) {
                 // console.log(points)
                 // this.graphics.fillPoint(points[0].x, points[0].y, 3)
