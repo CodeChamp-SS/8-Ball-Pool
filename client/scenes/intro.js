@@ -84,12 +84,12 @@ export default class Scene_8BallPool extends Phaser.Scene {
 
     createBall(x, y, key) {
         let ball = this.matter.add.sprite(x, y, key)
-        ball.setBody({
-            type: 'circle',
-            radius: 70,
-        });
         ball.displayHeight = 45
         ball.displayWidth = 45
+        ball.setBody({
+            type: 'circle',
+            radius: 22.5,
+        });
         ball.setBounce(0.9);
         ball.setFriction(0, 0.008, 0.1);
         if (key === 'ball_16') {
@@ -383,7 +383,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
             });
         });
 
-        this.graphics = this.add.graphics({lineStyle: {width: 4, color: 0xffffff}});
+        this.graphics = this.add.graphics({lineStyle: {width: 3, color: 0xffffff}});
         this.graphics.alpha = 0.4
         this.hit = false
         this.moveLine = true
@@ -460,7 +460,8 @@ export default class Scene_8BallPool extends Phaser.Scene {
             // ballPosition.x + 1200, ballPosition.y
             this.balls.forEach(ball => {
                 if (ball.body.position !== ballPosition){
-                    let circle = new Phaser.Geom.Circle(ball.body.position.x, ball.body.position.y, 70)
+                    let circle = new Phaser.Geom.Circle(ball.body.position.x, ball.body.position.y, 22.5)
+                    // this.graphics.strokeCircle(circle.x, circle.y, circle.radius)
                     this.circles.push(circle)
                 }
             })
@@ -496,10 +497,16 @@ export default class Scene_8BallPool extends Phaser.Scene {
 
         let minDist = 1e9
         let pt
+        /*let pts = Phaser.Geom.Intersects.GetLineToCircle(this.line, this.circles[0])
+        pts.forEach(point => {
+            this.graphics.fillPoint(point.x, point.y, 3)
+        })*/
         this.circles.forEach(circle => {
             let points = Phaser.Geom.Intersects.GetLineToCircle(this.line, circle)
-            // console.log(points)
+            // console.log(points[0])
             if (points.length) {
+                // console.log(points)
+                // this.graphics.fillPoint(points[0].x, points[0].y, 3)
                 if (Math.pow(points[0].x - ballPosition.x, 2) + Math.pow(points[0].y - ballPosition.y, 2) < minDist){
                     minDist = Math.pow(points[0].x - ballPosition.x, 2) + Math.pow(points[0].y - ballPosition.y, 2)
                     pt = points[0]
@@ -507,12 +514,22 @@ export default class Scene_8BallPool extends Phaser.Scene {
             }
         })
         console.log(pt)
-        /*if (pt !== undefined) {
+        if (pt !== undefined) {
             this.graphics.clear()
-            this.line.x2 = pt.x
-            this.line.y2 = pt.y
+            // this.graphics.fillPoint(pt.x, pt.y, 4)
             this.graphics.strokeLineShape(this.line)
-        }*/
+            this.guideCircle = new Phaser.Geom.Circle(pt.x - 12, pt.y - 12, 12)
+            this.graphics.strokeCircle(this.guideCircle.x, this.guideCircle.y, this.guideCircle.radius)
+            this.guideLine1 = new Phaser.Geom.Line(this.guideCircle.x, this.guideCircle.y, pt.x, pt.y)
+            // this.guideLine2 = new Phaser.Geom.Line(this.guideCircle.x, this.guideCircle.y, )
+            // this.guideLine1.lineStyle(3, 0xffffff, 0.4)
+            this.graphics.strokeLineShape(this.guideLine1)
+
+            // this.line = new Phaser.Geom.Line(ballPosition.x, ballPosition.y, pt.x, pt.y)
+            // this.line.setTo(this.line.x1, this.line.y1, pt.x, pt.y)
+            // this.line.y2 = pt.y
+            // this.graphics.strokeLineShape(this.line)
+        }
 
         if (this.cursors.down.isDown) {
             console.log("power increasing")
