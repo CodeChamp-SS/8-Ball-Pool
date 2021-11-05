@@ -412,6 +412,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         // console.log(ballPosition.x, ballPosition.y)
         this.line = new Phaser.Geom.Line(ballPosition.x, ballPosition.y, ballPosition.x + 1200, ballPosition.y)
         this.graphics.strokeLineShape(this.line)
+        this.moveLine = true
         this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
     }
 
@@ -535,15 +536,29 @@ export default class Scene_8BallPool extends Phaser.Scene {
         if (pt !== undefined) {
             this.graphics.clear()
             this.graphics.fillPoint(pt.x, pt.y, 3)
-            this.graphics.strokeLineShape(this.line)
+            // this.graphics.strokeLineShape(this.line)
             // this.graphics.strokeLineShape(this.helperLines[this.helperLines.length - 1])
 
-            this.graphics.fillPoint(pt.x, pt.y, 10)
-            let slope = Phaser.Geom.Line.Slope(this.line)
-            let centreLine = new Phaser.Geom.Line(circleCentre[0], circleCentre[1], pt.x, pt.y)
+            // this.graphics.fillPoint(pt.x, pt.y, 10)
+            // let slope = Phaser.Geom.Line.Slope(this.line)
+            let centreLine = new Phaser.Geom.Line(pt.x, pt.y, circleCentre[0], circleCentre[1])
+            Phaser.Geom.Line.Extend(centreLine, -22.5, 50)
+            let angle = Phaser.Geom.Line.Angle(centreLine)
+            let centre = [pt.x - 15 * Math.cos(angle), pt.y - 15 * Math.sin(angle)]
+            this.line.x2 = centre[0]
+            this.line.y2 = centre[1]
+            this.guideCircle = new Phaser.Geom.Circle(centre[0], centre[1], 15)
+            this.graphics.strokeLineShape(this.line)
+            /*Phaser.Geom.Line.Extend(centreLine, 100, 100)
+            let intersection = Phaser.Geom.Intersects.GetLineToLine(centreLine, this.line)
+            console.log(intersection.x)
+            console.log(intersection.y)*/
+            // centreLine.x1 = circleCentre.x
+            // centreLine.y1 = circleCentre.y
             this.graphics.strokeLineShape(centreLine)
             // console.log(slope)
-            this.guideCircle = new Phaser.Geom.Circle(pt.x - 22.5 * Math.cos(slope), pt.y - 22.5 * Math.sin(slope), 22.5)
+            // this.guideCircle = new Phaser.Geom.Circle(intersection.x, intersection.y, 22.5)
+            // this.guideCircle = new Phaser.Geom.Circle(pt.x - 22.5 * Math.cos(slope), pt.y - 22.5 * Math.sin(slope), 22.5)
             this.graphics.strokeCircle(this.guideCircle.x, this.guideCircle.y, this.guideCircle.radius)
         }
 
