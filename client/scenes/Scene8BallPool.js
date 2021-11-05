@@ -122,6 +122,37 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.createBall(342, 350, 'ball_16')
     }
 
+    createCushion(x, y, sideSlope, height, width, angle = 0) {
+        let cushion = this.matter.add.image(x, y, '');
+        cushion.setBody({
+            type: 'trapezoid',
+            slope: sideSlope
+        })
+        cushion.setRotation(angle)
+        cushion.setVisible(false)
+        cushion.setBounce(0.9)
+        cushion.setStatic(true)
+        cushion.setFrictionStatic(0.1)
+        cushion.displayHeight = height
+        cushion.displayWidth = width
+        cushion.setCollisionCategory(this.cushionCategory)
+        return cushion
+    }
+
+    createPot(x, y) {
+        let pot = this.matter.add.image(x, y, 'ball_1')
+        pot.setBody({
+            type: 'circle',
+            radius: 70,
+        });
+        pot.setVisible(false)
+        pot.displayHeight = 45
+        pot.displayWidth = 45
+        pot.setStatic(true)
+        pot.setCollisionCategory(this.potCategory)
+        return pot
+    }
+
     create() {
         let board = this.add.image(0, 0, 'board');
         board.setOrigin(0, 0)
@@ -139,147 +170,19 @@ export default class Scene_8BallPool extends Phaser.Scene {
         let boundary = this.matter.world.setBounds(35, 25, 1375, 730, 1)
         boundary.disableGravity();
 
-        let cushion1 = this.matter.add.image(410, 55, 'platform');
-        cushion1.setBody({
-            type: 'trapezoid',
-            slope: -0.1
-        })
-        cushion1.setVisible(false)
-        cushion1.setBounce(0.9)
-        cushion1.setStatic(true)
-        cushion1.setFrictionStatic(0.1)
-        cushion1.displayHeight = 65
-        cushion1.displayWidth = 540
-        cushion1.setCollisionCategory(this.cushionCategory)
-        let cushion2 = this.matter.add.image(1045, 55, 'platform');
-        cushion2.setBody({
-            type: 'trapezoid',
-            slope: -0.1
-        })
-        cushion2.setVisible(false)
-        cushion2.setStatic(true)
-        cushion2.setBounce(0.9)
-        cushion2.setFrictionStatic(0.1)
-        cushion2.displayHeight = 65
-        cushion2.displayWidth = 540
-        cushion2.setCollisionCategory(this.cushionCategory)
-        let cushion3 = this.matter.add.image(1380, 390, 'platform');
-        cushion3.setBody({
-            type: 'trapezoid',
-            slope: -0.2
-        })
-        cushion3.setRotation(Math.PI / 2)
-        cushion3.setVisible(false)
-        cushion3.setStatic(true)
-        cushion3.setBounce(0.9)
-        cushion3.setFrictionStatic(0.1)
-        cushion3.displayHeight = 505
-        cushion3.displayWidth = 60
-        cushion3.setCollisionCategory(this.cushionCategory)
-        let cushion4 = this.matter.add.image(65, 390, 'platform');
-        cushion4.setBody({
-            type: 'trapezoid',
-            slope: 0.2
-        })
-        cushion4.setRotation(Math.PI / 2)
-        cushion4.setVisible(false)
-        cushion4.setStatic(true)
-        cushion4.setBounce(0.9)
-        cushion4.setFrictionStatic(0.1)
-        cushion4.displayHeight = 615
-        cushion4.displayWidth = 60
-        cushion4.setCollisionCategory(this.cushionCategory)
-        let cushion5 = this.matter.add.image(410, 725, 'platform');
-        cushion5.setBody({
-            type: 'trapezoid',
-            slope: 0.1,
-        })
-        cushion5.setVisible(false)
-        cushion5.setStatic(true)
-        cushion5.setBounce(0.9)
-        cushion5.setFrictionStatic(0.1)
-        cushion5.displayHeight = 65
-        cushion5.displayWidth = 595
-        cushion5.setCollisionCategory(this.cushionCategory)
-        let cushion6 = this.matter.add.image(1045, 725, 'platform');
-        cushion6.setBody({
-            type: 'trapezoid',
-            slope: 0.1
-        })
-        cushion6.setVisible(false)
-        cushion6.setStatic(true)
-        cushion6.setBounce(0.9)
-        cushion6.setFrictionStatic(0.1)
-        cushion6.displayHeight = 65
-        cushion6.displayWidth = 595
-        cushion6.setCollisionCategory(this.cushionCategory)
+        let cushion1 = this.createCushion(410, 55, -0.1, 65, 540)
+        let cushion2 = this.createCushion(1045, 55, -0.1, 65, 540)
+        let cushion3 = this.createCushion(1380, 390, -0.2, 505, 60, Math.PI / 2)
+        let cushion4 = this.createCushion(65, 390, 0.2, 615, 60, Math.PI / 2)
+        let cushion5 = this.createCushion(410, 725, 0.1, 65, 595)
+        let cushion6 = this.createCushion(1045, 725, 0.1, 65, 595)
 
-        // pocket 1: 95, 85
-        // pocket 2: 730, 75
-        // pocket 3: 1355, 85
-        // pocket 4: 1350, 695
-        // pocket 5: 730, 705
-        // pocket 6: 95, 695
-        let pot1 = this.matter.add.image(70, 65, 'ball_1')
-        pot1.setBody({
-            type: 'circle',
-            radius: 70,
-        });
-        pot1.setVisible(false)
-        pot1.displayHeight = 45
-        pot1.displayWidth = 45
-        pot1.setStatic(true)
-        pot1.setCollisionCategory(this.potCategory)
-        let pot2 = this.matter.add.image(728, 40, 'ball_1')
-        pot2.setBody({
-            type: 'circle',
-            radius: 70,
-        });
-        pot2.setVisible(false)
-        pot2.setStatic(true)
-        pot2.displayHeight = 45
-        pot2.displayWidth = 45
-        pot2.setCollisionCategory(this.potCategory)
-        let pot3 = this.matter.add.image(1380, 65, 'ball_1')
-        pot3.setBody({
-            type: 'circle',
-            radius: 70,
-        });
-        pot3.setStatic(true)
-        pot3.setVisible(false)
-        pot3.displayHeight = 45
-        pot3.displayWidth = 45
-        pot3.setCollisionCategory(this.potCategory)
-        let pot4 = this.matter.add.image(1380, 710, 'ball_1')
-        pot4.setBody({
-            type: 'circle',
-            radius: 70,
-        });
-        pot4.setVisible(false)
-        pot4.setStatic(true)
-        pot4.displayHeight = 45
-        pot4.displayWidth = 45
-        pot4.setCollisionCategory(this.potCategory)
-        let pot5 = this.matter.add.image(728, 740, 'ball_1')
-        pot5.setBody({
-            type: 'circle',
-            radius: 70,
-        });
-        pot5.setVisible(false)
-        pot5.setStatic(true)
-        pot5.displayHeight = 45
-        pot5.displayWidth = 45
-        pot5.setCollisionCategory(this.potCategory)
-        let pot6 = this.matter.add.image(70, 710, 'ball_1')
-        pot6.setBody({
-            type: 'circle',
-            radius: 70,
-        });
-        pot6.setVisible(false)
-        pot6.setStatic(true)
-        pot6.displayHeight = 45
-        pot6.displayWidth = 45
-        pot6.setCollisionCategory(this.potCategory)
+        let pot1 = this.createPot(70, 65)
+        let pot2 = this.createPot(728, 40)
+        let pot3 = this.createPot(1380, 65)
+        let pot4 = this.createPot(1380, 710)
+        let pot5 = this.createPot(728, 740)
+        let pot6 = this.createPot(70, 710)
 
         this.balls = []
         this.createBalls()
