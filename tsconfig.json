@@ -1,48 +1,17 @@
-//{
-//  "compilerOptions": {
-//    "outDir": "lib",
-//    "target": "es6",
-//    "module": "commonjs",
-//    "strict": true,
-//    "allowJs": true,
-//    "strictNullChecks": false,
-//    "esModuleInterop": true,
-//    "experimentalDecorators": true,
-//    "skipLibCheck": true,
-//    "forceConsistentCasingInFileNames": true
-//  },
-//  "include": [
-//    "src/**/*"
-//  ]
-//}
 {
   "compilerOptions": {
-    "target": "es2016",
-    "module": "es6",
+    "outDir": "lib",
+    "target": "es6",
+    "module": "commonjs",
     "strict": true,
-    "noImplicitAny": false,
-    "noEmit": true,
     "allowJs": true,
-    "jsx": "preserve",
-    "importHelpers": true,
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
+    "strictNullChecks": false,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
-    "baseUrl": "./src",
-    "paths": {
-      "~/*": ["./*"]
-    },
-    "typeRoots": [
-      "node_modules/@types",
-      "node_modules/phaser/types"
-    ],
-    "types": [
-      "phaser"
-    ]
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
-    "src/**/*"
+    "src/**/*", "client/**/*"
   ]
 }

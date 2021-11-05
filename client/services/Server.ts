@@ -1,5 +1,5 @@
 import {Client, Room} from 'colyseus.js'
-// import Phaser from 'phaser'
+import Phaser from 'phaser'
 import {IBall8PoolState, GameState} from '../../types/IBall8PoolState'
 import {Message} from '../../types/messages'
 

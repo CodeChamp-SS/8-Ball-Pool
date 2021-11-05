@@ -1,4 +1,4 @@
-// import Phaser from 'phaser'
+import Phaser from 'phaser'
 import {IGameOverSceneData, IGameSceneData} from '../../types/scenes'
 import {IBall8PoolState, IBallPosition, GameState} from '../../types/IBall8PoolState'
 import type Server from '../services/Server'
