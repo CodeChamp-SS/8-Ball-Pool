@@ -1,4 +1,6 @@
-import Scene_8BallPool from './scenes/Scene8BallPool.js'
+import Scene_8BallPoolMulti from './scenes/Scene_8BallPoolMulti.ts'
+import GameOver from './scenes/GameOver.ts'
+import Bootstrap from './scenes/Bootstrap.ts'
 
 var config = {
     type: Phaser.AUTO,
@@ -15,7 +17,7 @@ var config = {
             debug: true
         }
     },
-    scene: [Scene_8BallPool],
+    scene: [Scene_8BallPoolMulti, Bootstrap, GameOver],
 };
 
 var game = new Phaser.Game(config);
