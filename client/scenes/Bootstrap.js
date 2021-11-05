@@ -1,9 +1,9 @@
 import Phaser from 'phaser'
-import {IGameOverSceneData} from '../../types/scenes'
+//import {IGameOverSceneData} from '../../types/scenes'
 import Server from '../services/Server'
 
 export default class Bootstrap extends Phaser.Scene {
-    private server!: Server
+    //private server!: Server
 
     constructor() {
         super('bootstrap')
@@ -16,8 +16,8 @@ export default class Bootstrap extends Phaser.Scene {
     create() {
         this.createNewGame()
     }
-
-    private handleGameOver = (data: IGameOverSceneData) => {
+    //data: IGameOverSceneData
+    handleGameOver = (data) => {
         this.server.leave()
         this.scene.stop('game')
 
@@ -27,12 +27,12 @@ export default class Bootstrap extends Phaser.Scene {
         })
     }
 
-    private handleRestart = () => {
+    handleRestart = () => {
         this.scene.stop('game-over')
         this.createNewGame()
     }
 
-    private createNewGame() {
+    createNewGame() {
         this.scene.launch('game', {
             server: this.server,
             onGameOver: this.handleGameOver

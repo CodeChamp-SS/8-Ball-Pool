@@ -1,14 +1,15 @@
 import {Client, Room} from 'colyseus.js'
 import Phaser from 'phaser'
-import {IBall8PoolState, GameState} from '../../types/IBall8PoolState'
-import {Message} from '../../types/messages'
+
+// import {IBall8PoolState, GameState} from '../../types/IBall8PoolState'
+// import {Message} from '../../types/messages'
 
 export default class Server {
-    private client: Client
-    private events: Phaser.Events.EventEmitter
+    // private client: Client
+    // private events: Phaser.Events.EventEmitter
 
-    private room?: Room<IBall8PoolState>
-    private _playerIndex = -1
+    // private room?: Room<IBall8PoolState>
+    // private _playerIndex = -1
 
     get playerIndex() {
         return this._playerIndex
@@ -29,8 +30,9 @@ export default class Server {
 
     async join() {
         this.room = await this.client.joinOrCreate<IBall8PoolState>('ball-8-pool')
-
-        this.room.onMessage(Message.PlayerIndex, (message: { playerIndex: number }) => {
+        
+        //message: { playerIndex: number }
+        this.room.onMessage(Message.PlayerIndex, (message) => {
             console.log(message.playerIndex)
             this._playerIndex = message.playerIndex
         })
@@ -73,8 +75,8 @@ export default class Server {
         this.room?.leave()
         this.events.removeAllListeners()
     }
-
-    makeSelection(idx: number) {
+    //idx: number
+    makeSelection(idx) {
         if (!this.room) {
             return
         }
@@ -90,24 +92,26 @@ export default class Server {
 
         this.room.send(Message.PlayerSelection, {index: idx})
     }
-
-    onceStateChanged(cb: (state: IBall8PoolState) => void, context?: any) {
+    
+    //state: IBall8PoolState
+    //cb: (state) => void, context?: any
+    onceStateChanged(cb, context){
         this.events.once('once-state-changed', cb, context)
     }
-
-    onBoardChanged(cb: (cell: number, index: number) => void, context?: any) {
+    //cb: (cell: number, index: number) => void, context?: any    
+    onBoardChanged(cb, context) {
         this.events.on('board-changed', cb, context)
     }
-
-    onPlayerTurnChanged(cb: (playerIndex: number) => void, context?: any) {
+    //cb: (playerIndex: number) => void, context?: any
+    onPlayerTurnChanged(cb, context) {
         this.events.on('player-turn-changed', cb, context)
     }
-
-    onPlayerWon(cb: (playerIndex: number) => void, context?: any) {
+    //cb: (playerIndex: number) => void, context?: any
+    onPlayerWon(cb, context) {
         this.events.on('player-win', cb, context)
     }
-
-    onGameStateChanged(cb: (state: GameState) => void, context?: any) {
+    //cb: (state: GameState) => void, context?: any
+    onGameStateChanged(cb, context) {
         this.events.on('game-state-changed', cb, context)
     }
 }

@@ -4,7 +4,7 @@ import Bootstrap from './scenes/Bootstrap'
 import Scene_8BallPool from './scenes/Scene_8BallPoolMulti'
 import GameOver from './scenes/GameOver'
 
-const config: Phaser.Types.Core.GameConfig = {
+const config = {
     type: Phaser.AUTO,
     width: window.screen.width,
     height: 780,

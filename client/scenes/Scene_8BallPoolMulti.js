@@ -1,17 +1,16 @@
 import Phaser from 'phaser'
-import {IGameOverSceneData, IGameSceneData} from '../../types/scenes'
-import {IBall8PoolState, IBallPosition, GameState} from '../../types/IBall8PoolState'
-import type Server from '../services/Server'
+//import {IGameOverSceneData, IGameSceneData} from '../../types/scenes'
+//import {IBall8PoolState, IBallPosition, GameState} from '../../types/IBall8PoolState'
+import Server from '../services/Server'
 
 export default class Scene_8BallPoolMulti extends Phaser.Scene {
-    private server?: Server
-    private onGameOver?: (data: IGameOverSceneData) => void
-
-    private gameStateText?: Phaser.GameObjects.Text
-
-    private cells: { display: Phaser.GameObjects.Rectangle, value: IBallPosition }[] = []
+    //private server?: Server
+    //private onGameOver?: (data: IGameOverSceneData) => void
+    //private gameStateText?: Phaser.GameObjects.Text
 
     constructor() {
+        this.server = null
+        this.gameStateText = null
         super('game')
         console.log('scene started')
     }
@@ -99,8 +98,8 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
     init() {
         this.cells = []
     }
-
-    async create(data: IGameSceneData) {
+    //data: IGameSceneData
+    async create(data) {
         const {server, onGameOver} = data
 
         this.server = server

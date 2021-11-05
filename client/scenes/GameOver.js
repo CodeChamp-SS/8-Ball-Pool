@@ -1,12 +1,12 @@
 import Phaser from 'phaser'
-import {IGameOverSceneData} from '../../types/scenes'
+//import {IGameOverSceneData} from '../../types/scenes'
 
 export default class GameOver extends Phaser.Scene {
     constructor() {
         super('game-over')
     }
-
-    create(data: IGameOverSceneData) {
+    //data: IGameOverSceneData
+    create(data) {
         const text = data.winner
             ? 'You Won!'
             : 'You Lost!'
