@@ -13,7 +13,7 @@ export default Arena({
         /**
          * Define your room handlers:
          */
-        gameServer.define('my_room', MyRoom);
+        gameServer.define('ball-8-pool', MyRoom);
 
     },
 

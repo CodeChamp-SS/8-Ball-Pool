@@ -1,6 +1,4 @@
-import Phaser from 'phaser'
-//import {IGameOverSceneData} from '../../types/scenes'
-import Server from '../services/Server'
+import Server from '../services/Server.js'
 
 export default class Bootstrap extends Phaser.Scene {
     //private server!: Server

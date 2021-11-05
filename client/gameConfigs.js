@@ -1,8 +1,6 @@
-import 'regenerator-runtime/runtime'
-import Phaser from 'phaser'
-import Bootstrap from './scenes/Bootstrap'
-import Scene_8BallPool from './scenes/Scene_8BallPoolMulti'
-import GameOver from './scenes/GameOver'
+import Bootstrap from './scenes/Bootstrap.js'
+import Scene_8BallPool from './scenes/Scene_8BallPoolMulti.js'
+import GameOver from './scenes/GameOver.js'
 
 const config = {
     type: Phaser.AUTO,
