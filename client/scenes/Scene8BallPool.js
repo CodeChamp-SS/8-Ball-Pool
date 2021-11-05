@@ -90,8 +90,8 @@ export default class Scene_8BallPool extends Phaser.Scene {
             type: 'circle',
             radius: 22.5,
         });
-        ball.setBounce(0.9);
-        ball.setFriction(0, 0.008, 0.1);
+        ball.setBounce(1);
+        ball.setFriction(0, 0.01, 0.2);
         if (key === 'ball_16') {
             // ball.setVelocity(50, 0);
             // ball.setAngularVelocity(0)
@@ -412,6 +412,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         // console.log(ballPosition.x, ballPosition.y)
         this.line = new Phaser.Geom.Line(ballPosition.x, ballPosition.y, ballPosition.x + 1200, ballPosition.y)
         this.graphics.strokeLineShape(this.line)
+        this.moveLine = true
         this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
     }
 
@@ -448,13 +449,14 @@ export default class Scene_8BallPool extends Phaser.Scene {
             this.moveLine = true
             this.graphics.clear()
             this.cue.setVisible(false)
+            this.cue.setToSleep()
             this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
         } else {
+            this.cue.setAwake()
             if (!this.cueBall.visible) {
                 this.cueBall.setPosition(342, 350)
                 ballPosition = this.cueBall.body.position
                 this.matter.body.setPosition(this.cue.body, this.matter.vector.create(this.cueBall.body.position.x - 410, this.cueBall.body.position.y))
-                this.cue.setAwake()
                 this.cueBall.setVisible(true).setAwake()
             }
             // ballPosition.x + 1200, ballPosition.y
@@ -475,9 +477,9 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 this.line = new Phaser.Geom.Line(ballPosition.x, ballPosition.y, ballPosition.x + 1200, ballPosition.y)
                 this.helperLines = []
                 this.helperLines.push(this.line)
-                for (let i = 0; i < 10; i++){
-                    let helperLineUp = new Phaser.Geom.Line(ballPosition.x, ballPosition.y - 22.5 + 2.25 * i, ballPosition.x + 1200, ballPosition.y - 22.5 + 2.25 * i)
-                    let helperLineDown = new Phaser.Geom.Line(ballPosition.x, ballPosition.y + 2.25 * (i + 1), ballPosition.x + 1200, ballPosition.y + 2.25 * (i + 1))
+                for (let i = 0; i < 25; i++){
+                    let helperLineUp = new Phaser.Geom.Line(ballPosition.x, ballPosition.y - 22.5 + .9 * i, ballPosition.x + 1200, ballPosition.y - 22.5 + .9 * i)
+                    let helperLineDown = new Phaser.Geom.Line(ballPosition.x, ballPosition.y + .9 * (i + 1), ballPosition.x + 1200, ballPosition.y + .9 * (i + 1))
                     this.helperLines.push(helperLineUp, helperLineDown)
                     // this.graphics.strokeLineShape(helperLineUp)
                     // this.graphics.strokeLineShape(helperLineDown)
@@ -495,24 +497,24 @@ export default class Scene_8BallPool extends Phaser.Scene {
             if (!moveCue) {
                 this.graphics.clear()
                 this.helperLines.forEach(helpLine => {
-                    Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, -Math.PI / 180)
+                    Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, -Math.PI / 360)
                 })
                 this.graphics.strokeLineShape(this.line)
                 // this.graphics.strokeLineShape(this.helperLines[1])
                 // this.graphics.strokeLineShape(this.helperLines[this.helperLines.length - 1])
             }
-            this.matter.body.rotate(this.cue.body, -Math.PI / 180, this.matter.vector.create(ballPosition.x, ballPosition.y))
+            this.matter.body.rotate(this.cue.body, -Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
         } else if (this.cursors.right.isDown) {
             if (!moveCue) {
                 this.graphics.clear()
                 this.helperLines.forEach(helpLine => {
-                    Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, Math.PI / 180)
+                    Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, Math.PI / 360)
                 })
                 this.graphics.strokeLineShape(this.line)
                 // this.graphics.strokeLineShape(this.helperLines[1])
                 // this.graphics.strokeLineShape(this.helperLines[this.helperLines.length - 1])
             }
-            this.matter.body.rotate(this.cue.body, Math.PI / 180, this.matter.vector.create(ballPosition.x, ballPosition.y))
+            this.matter.body.rotate(this.cue.body, Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
         }
 
         let minDist = 1e9
@@ -538,9 +540,10 @@ export default class Scene_8BallPool extends Phaser.Scene {
             this.graphics.strokeLineShape(this.line)
             // this.graphics.strokeLineShape(this.helperLines[this.helperLines.length - 1])
 
-            this.graphics.fillPoint(pt.x, pt.y, 10)
             let slope = Phaser.Geom.Line.Slope(this.line)
-            let centreLine = new Phaser.Geom.Line(circleCentre[0], circleCentre[1], pt.x, pt.y)
+            let centreLine = new Phaser.Geom.Line(pt.x, pt.y, circleCentre[0], circleCentre[1])
+            let centreLineSlope = Phaser.Geom.Line.Slope(centreLine)
+            Phaser.Geom.Line.Extend(centreLine, 0, 100)
             this.graphics.strokeLineShape(centreLine)
             // console.log(slope)
             this.guideCircle = new Phaser.Geom.Circle(pt.x - 22.5 * Math.cos(slope), pt.y - 22.5 * Math.sin(slope), 22.5)
@@ -570,6 +573,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 this.cueBall.setCollidesWith(this.cueBallCollidesWith)
                 this.cueBall.disableInteractive()
                 this.matter.applyForceFromAngle(this.cue.body, speed, angle - Math.PI / 2)
+                this.cue.s
             }
         }
     }

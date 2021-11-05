@@ -1,4 +1,4 @@
-import Scene_8BallPool from './scenes/intro.js'
+import Scene_8BallPool from './scenes/Scene8BallPool.js'
 
 var config = {
     type: Phaser.AUTO,
