@@ -91,7 +91,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
             radius: 22.5,
         });
         ball.setBounce(1);
-        ball.setFriction(0, 0.01, 0.2);
+        ball.setFriction(0.7, 0.01);
         if (key === 'ball_16') {
             // ball.setVelocity(50, 0);
             // ball.setAngularVelocity(0)
@@ -130,6 +130,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         })
         cushion.setRotation(angle)
         cushion.setVisible(false)
+        cushion.setBounce(0.8)
         cushion.setBounce(0.9)
         cushion.setStatic(true)
         cushion.setFrictionStatic(0.1)
@@ -172,9 +173,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
         let boundary = this.matter.world.setBounds(35, 25, 1375, 730, 1)
         boundary.disableGravity();
 
-        this.balls = []
-        this.createBalls()
-
         let cushion1 = this.createCushion(410, 55, -0.1, 65, 540)
         let cushion2 = this.createCushion(1045, 55, -0.1, 65, 540)
         let cushion3 = this.createCushion(1380, 390, -0.2, 505, 60, Math.PI / 2)
@@ -188,6 +186,10 @@ export default class Scene_8BallPool extends Phaser.Scene {
         let pot4 = this.createPot(1380, 710)
         let pot5 = this.createPot(728, 740)
         let pot6 = this.createPot(70, 710)
+
+        this.balls = []
+        this.createBalls()
+
         let potCategory = pot1.body.collisionFilter.category
         console.log(pot1.body.collisionFilter, cushion1.body.collisionFilter)
 
