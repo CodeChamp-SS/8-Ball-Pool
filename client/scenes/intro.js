@@ -1,10 +1,6 @@
-// import {type} from "@colyseus/schema";
-
 export default class Scene_8BallPool extends Phaser.Scene {
     constructor() {
         super("Scene_8BallPool");
-        this.balls = []
-        this.pockets = []
     }
 
     preload() {
@@ -78,28 +74,33 @@ export default class Scene_8BallPool extends Phaser.Scene {
             'assets/cue.png',
             {frameWidth: 694, frameHeight: 20}
         );
+        this.load.audio('ball_collision', ['assets/sounds/ball_collision.mp3'])
+        this.load.audio('cushion_collision', ['assets/sounds/cushion_collision.mp3'])
+        this.load.audio('foul', ['assets/sounds/foul.mp3'])
+        this.load.audio('pocket', ['assets/sounds/pocket.mp3'])
+        this.load.audio('cue_collision_strong', ['assets/sounds/cue_collision_strong.mp3'])
+        this.load.audio('cue_collision_weak', ['assets/sounds/cue_collision_weak.mp3'])
     }
 
     createBall(x, y, key) {
         let ball = this.matter.add.sprite(x, y, key)
-        ball.setBody({
-            type: 'circle',
-            radius: 70,
-        });
         ball.displayHeight = 45
         ball.displayWidth = 45
-        ball.setBounce(0.9);
-        ball.setFriction(0, 0.008, 0.1);
+        ball.setBody({
+            type: 'circle',
+            radius: 22.5,
+        });
+        ball.setBounce(1);
+        ball.setFriction(0.7, 0.01);
         if (key === 'ball_16') {
-            ball.setVelocity(30, 0);
-            ball.setAngularVelocity(0)
+            // ball.setVelocity(50, 0);
+            // ball.setAngularVelocity(0)
             this.cueBall = ball
-        } else ball.setVelocity(0, 0);
+            ball.setCollisionCategory(this.cueBallCategory)
+        } else {
+            ball.setCollisionCategory(this.ballCategory)
+        }
         this.balls.push(ball)
-        // ball.setCollisionCategory(this.ballCategory)
-        // ball.setCollidesWith(this.ballCategory)
-        // let posv = ball.body.position
-        // let v1 = new Phaser.Math.Vector2(2, 5)
     }
 
     createBalls() {
@@ -119,7 +120,37 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.createBall(1152, 410, 'ball_13')
         this.createBall(1152, 350, 'ball_15')
         this.createBall(342, 350, 'ball_16')
-        // console.log(this.balls)
+    }
+
+    createCushion(x, y, sideSlope, height, width, angle = 0) {
+        let cushion = this.matter.add.image(x, y, '');
+        cushion.setBody({
+            type: 'trapezoid',
+            slope: sideSlope
+        })
+        cushion.setRotation(angle)
+        cushion.setVisible(false)
+        cushion.setBounce(0.8)
+        cushion.setStatic(true)
+        cushion.setFrictionStatic(0.1)
+        cushion.displayHeight = height
+        cushion.displayWidth = width
+        cushion.setCollisionCategory(this.cushionCategory)
+        return cushion
+    }
+
+    createPot(x, y) {
+        let pot = this.matter.add.image(x, y, 'ball_1')
+        pot.setBody({
+            type: 'circle',
+            radius: 70,
+        });
+        pot.setVisible(false)
+        pot.displayHeight = 45
+        pot.displayWidth = 45
+        pot.setStatic(true)
+        pot.setCollisionCategory(this.potCategory)
+        return pot
     }
 
     create() {
@@ -128,134 +159,368 @@ export default class Scene_8BallPool extends Phaser.Scene {
         board.displayWidth = this.sys.canvas.width
         board.displayHeight = this.sys.canvas.height
 
+        this.ballCategory = this.matter.world.nextCategory();
+        this.cueCategory = this.matter.world.nextCategory();
+        this.cueBallCategory = this.matter.world.nextCategory();
+        this.cushionCategory = this.matter.world.nextCategory();
+        this.potCategory = this.matter.world.nextCategory()
 
         // x: 95 y: 90
         // width: 1355 height: 600
-        let boundary = this.matter.world.setBounds(35, 25, 1450, 730, 1)
+        let boundary = this.matter.world.setBounds(35, 25, 1375, 730, 1)
         boundary.disableGravity();
 
-        let cushion1 = this.matter.add.image(435, 55, 'platform');          //top left
-        cushion1.setBody({
-            type: 'trapezoid',
-            slope: -0.15
-        })
-        cushion1.setVisible(false)
-        cushion1.setBounce(0.9)
-        cushion1.setStatic(true)
-        cushion1.setFrictionStatic(0.1)
-        cushion1.displayHeight = 65
-        cushion1.displayWidth = 575
-        let cushion2 = this.matter.add.image(1100, 55, 'platform');         //top right
-        cushion2.setBody({
-            type: 'trapezoid',
-            slope: -0.12
-        })
-        cushion2.setVisible(false)
-        cushion2.setStatic(true)
-        cushion2.setBounce(0.9)
-        cushion2.setFrictionStatic(0.1)
-        cushion2.displayHeight = 65
-        cushion2.displayWidth = 567
-        let cushion3 = this.matter.add.image(1455, 390, 'platform');        //right
-        cushion3.setBody({
-            type: 'trapezoid',
-            slope: -0.24
-        })
-        cushion3.setRotation(Math.PI / 2)
-        cushion3.setVisible(false)
-        cushion3.setStatic(true)
-        cushion3.setBounce(0.9)
-        cushion3.setFrictionStatic(0.1)
-        cushion3.displayHeight = 505
-        cushion3.displayWidth = 60
-        let cushion4 = this.matter.add.image(60, 390, 'platform');      //left
-        cushion4.setBody({
-            type: 'trapezoid',
-            slope: 0.2
-        })
-        cushion4.setRotation(Math.PI / 2)
-        cushion4.setVisible(false)
-        cushion4.setStatic(true)
-        cushion4.setBounce(0.9)
-        cushion4.setFrictionStatic(0.1)
-        cushion4.displayHeight = 640
-        cushion4.displayWidth = 70
-        let cushion5 = this.matter.add.image(432, 725, 'platform');     //bottom left
-        cushion5.setBody({
-            type: 'trapezoid',
-            slope: 0.15,
-        })
-        cushion5.setVisible(false)
-        cushion5.setStatic(true)
-        cushion5.setBounce(0.9)
-        cushion5.setFrictionStatic(0.1)
-        cushion5.displayHeight = 65
-        cushion5.displayWidth = 665
-        let cushion6 = this.matter.add.image(1103, 725, 'platform');        //bottom right
-        cushion6.setBody({
-            type: 'trapezoid',
-            slope: 0.15
-        })
-        cushion6.setVisible(false)
-        cushion6.setStatic(true)
-        cushion6.setBounce(0.9)
-        cushion6.setFrictionStatic(0.1)
-        cushion6.displayHeight = 65
-        cushion6.displayWidth = 663
+        let cushion1 = this.createCushion(410, 55, -0.1, 65, 540)
+        let cushion2 = this.createCushion(1045, 55, -0.1, 65, 540)
+        let cushion3 = this.createCushion(1380, 390, -0.2, 505, 60, Math.PI / 2)
+        let cushion4 = this.createCushion(65, 390, 0.2, 615, 60, Math.PI / 2)
+        let cushion5 = this.createCushion(410, 725, 0.1, 65, 595)
+        let cushion6 = this.createCushion(1045, 725, 0.1, 65, 595)
 
+        let pot1 = this.createPot(70, 65)
+        let pot2 = this.createPot(728, 40)
+        let pot3 = this.createPot(1380, 65)
+        let pot4 = this.createPot(1380, 710)
+        let pot5 = this.createPot(728, 740)
+        let pot6 = this.createPot(70, 710)
+
+        this.balls = []
         this.createBalls()
-
-        this.cursors = this.input.keyboard.createCursorKeys();
-        // this.ballCategory = this.matter.world.nextCategory();
-        // this.cueCategory = this.matter.world.nextCategory();
+        pot1.setCollidesWith([this.ballCategory, this.cueBallCategory])
+        pot2.setCollidesWith([this.ballCategory, this.cueBallCategory])
+        pot3.setCollidesWith([this.ballCategory, this.cueBallCategory])
+        pot4.setCollidesWith([this.ballCategory, this.cueBallCategory])
+        pot5.setCollidesWith([this.ballCategory, this.cueBallCategory])
+        pot6.setCollidesWith([this.ballCategory, this.cueBallCategory])
+        let potMask = pot1.body.collisionFilter.mask
 
         this.cue = this.matter.add.sprite(250, 370, 'cue')
         this.cue.setBody({
             type: 'trapezoid',
             slope: 0.5
         })
+        this.cue.setBounce(1)
+        this.cue.setMass(10)
+        this.cue.setFrictionAir(0.5)
         this.cue.setRotation(Math.PI / 2)
-        this.cue.setCollidesWith([])
+        this.cue.setCollisionCategory(this.cueCategory)
+        this.cue.setCollidesWith([this.cueBallCategory])
+        let cueMask = this.cue.body.collisionFilter.mask
+        let categories = [this.ballCategory, this.cueBallCategory, this.cushionCategory]
 
-        let pocket_1 = this.matter.add.sprite(80, 72, 'pocket_1')       //top left
-        let pocket_2 = this.matter.add.sprite(768, 59, 'pocket_2')      //top centre
-        let pocket_3 = this.matter.add.sprite(1449, 70, 'pocket_3')     //top right
-        let pocket_4 = this.matter.add.sprite(80, 709, 'pocket_4')      //bottom left
-        let pocket_5 = this.matter.add.sprite(1449, 709, 'pocket_5')    //bottom centre
-        let pocket_6 = this.matter.add.sprite(768, 725, 'pocket_6')     //bottom right
-        /*this.pocket_1.setStatic(true)
-        this.pocket_2.setStatic(true)
-        this.pocket_3.setStatic(true)
-        this.pocket_4.setStatic(true)
-        this.pocket_5.setStatic(true)
-        this.pocket_6.setStatic(true)*/
-        // this.pockets = []
-        this.pockets.push(pocket_1)
-        this.pockets.push(pocket_2)
-        this.pockets.push(pocket_3)
-        this.pockets.push(pocket_4)
-        this.pockets.push(pocket_5)
-        this.pockets.push(pocket_6)
-        console.log(typeof this.pockets)
-        this.pockets.forEach((pocket) => {
-            pocket.setBody({
-                type: 'circle',
-                radius: 10,
-            });
-            pocket.setStatic(true)
+        cushion1.setCollidesWith(categories)
+        cushion2.setCollidesWith(categories)
+        cushion3.setCollidesWith(categories)
+        cushion4.setCollidesWith(categories)
+        cushion5.setCollidesWith(categories)
+        cushion6.setCollidesWith(categories)
+        categories.push(this.potCategory)
+        this.balls.forEach(ball => {
+            ball.setCollidesWith(categories)
         })
+        categories.push(this.cueCategory)
+        this.cueBallCollidesWith = categories
+        this.cueBall.setCollidesWith(categories)
+
+        this.matter.body.setPosition(this.cue.body, this.matter.vector.create(this.cueBall.body.position.x - 410, this.cueBall.body.position.y))
+
+        this.cursors = this.input.keyboard.createCursorKeys();
+
+        let ballCollision = this.sound.add('ball_collision', {loop: false})
+        let cueCollisionWeak = this.sound.add('cue_collision_weak', {loop: false})
+        let cueCollisionStrong = this.sound.add('cue_collision_strong', {loop: false})
+        let cushionCollision = this.sound.add('cushion_collision', {loop: false})
+        this.foul = this.sound.add('foul', {loop: false})
+        let pocket = this.sound.add('pocket', {loop: false})
+
+        this.cueSpeed = 0
+
+        this.input.on('pointerdown', this.startDrag, this)
+        // this.input.on('pointerup', this.onRelease, this);
+
+        this.noBallTouched = false
+        this.noBallTouchedRest = true
+        this.cushionTouchedAfterHittingBall = true
+
+        this.matter.world.on("collisionstart", (event) => {
+            event.pairs.forEach((pair) => {
+                const {bodyA, bodyB} = pair;
+                // console.log(bodyA.collisionFilter.mask)
+                // console.log(bodyB.collisionFilter.mask)
+                if (bodyA.collisionFilter.mask === potMask) {
+                    if (bodyB.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask) {
+                        let ball = bodyB.gameObject
+                        console.log(bodyB.gameObject)
+                        bodyB.gameObject.destroy()
+                        pocket.play()
+                        this.cushionTouchedAfterHittingBall = true
+                        let index = this.balls.indexOf(ball);
+                        if (index !== -1) {
+                            this.balls.splice(index, 1);
+                        }
+                    } else {
+                        this.foulMade()
+                    }
+                } else if (bodyB.collisionFilter.mask === potMask) {
+                    if (bodyA.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask) {
+                        let ball = bodyA.gameObject
+                        console.log(bodyA.gameObject)
+                        bodyA.gameObject.destroy()
+                        pocket.play()
+                        this.cushionTouchedAfterHittingBall = true
+                        let index = this.balls.indexOf(ball);
+                        if (index !== -1) {
+                            this.balls.splice(index, 1);
+                            this.input.on('pointerDown', this.startDrag, this)
+                        }
+                    } else {
+                        this.foulMade()
+                    }
+                } else if (bodyA.collisionFilter.mask === cushion1.body.collisionFilter.mask || bodyB.collisionFilter.mask === cushion1.body.collisionFilter.mask) {
+                    if (bodyA.collisionFilter.mask == cushion1.body.collisionFilter.mask) {
+                        if (bodyB.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask && !this.noBallTouched) {
+                            this.cushionTouchedAfterHittingBall = true
+                        }
+                    } else {
+                        if (bodyA.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask && !this.noBallTouched) {
+                            this.cushionTouchedAfterHittingBall = true
+                        }
+                    }
+                    cushionCollision.play()
+                } else if (bodyA.collisionFilter.mask === cueMask || bodyB.collisionFilter.mask === cueMask) {
+                    cueCollisionStrong.play()
+                } else {
+                    ballCollision.play()
+                    this.noBallTouched = false
+                }
+            });
+        });
+
+        this.graphics = this.add.graphics({lineStyle: {width: 1, color: 0xffffff}});
+        this.graphics.alpha = 0.4
+        this.hit = false
+        this.moveLine = true
+    }
+
+    foulMade() {
+        console.log("foul!!!")
+        this.foul.play()
+        this.cueBall.setVelocity(0, 0)
+        this.cueBall.setToSleep().setInteractive().setVisible(false)
+        this.cue.setToSleep()
+        this.cueBall.setCollidesWith([])
+        this.noBallTouched = false
+    }
+
+    startDrag(pointer, targets) {
+        this.input.off('pointerdown', this.startDrag, this);
+        this.dragTarget = targets[0]
+        this.graphics.clear()
+        this.input.on('pointermove', this.doDrag, this);
+        this.input.on('pointerup', this.stopDrag, this);
+    }
+
+    doDrag(pointer) {
+        this.dragTarget.x = pointer.x;
+        this.dragTarget.y = pointer.y;
+        this.matter.body.setPosition(this.cue.body, this.matter.vector.create(this.cueBall.body.position.x - 410, this.cueBall.body.position.y))
+    }
+
+    stopDrag() {
+        this.input.on('pointerdown', this.startDrag, this);
+        this.input.off('pointermove', this.doDrag, this);
+        this.input.off('pointerup', this.stopDrag, this);
+        let ballPosition = this.cueBall.body.position
+        this.graphics.clear()
+        // console.log(ballPosition.x, ballPosition.y)
+        this.line = new Phaser.Geom.Line(ballPosition.x, ballPosition.y, ballPosition.x + 1200, ballPosition.y)
+        this.graphics.strokeLineShape(this.line)
+        this.moveLine = true
+        this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
+    }
+
+    /*onRelease(pointer) {
+        if (pointer.leftButtonReleased()) {
+            console.log('Left Button was released', this.cueSpeed);
+            if (this.cueSpeed > 0) {
+            }
+        }
+    }*/
+
+    f(x) {
+        return 50 / Math.pow(3, x) + 25
     }
 
     update() {
         let ballPosition = this.cueBall.body.position
-        if (Math.abs(this.cueBall.body.velocity.x) > 1e-2 || Math.abs(this.cueBall.body.velocity.y) > 1e-2) {
+        let moveCue = false
+
+        let pointer = this.input.activePointer;
+        // if(pointer.isDown) console.log("power increasing")
+        this.circles = []
+
+        this.balls.forEach(ball => {
+            if (Math.abs(ball.body.velocity.x) > 1e-2 || Math.abs(ball.body.velocity.y) > 1e-2) {
+                moveCue = true
+            }
+        })
+
+        let cuePosition = this.cue.body.position
+        let velocityVector = new Phaser.Math.Vector2(ballPosition.x - cuePosition.x, ballPosition.y - cuePosition.y)
+        let angle = velocityVector.angle() + Math.PI / 2
+        if (moveCue) {
+            this.moveLine = true
+            if (this.noBallTouchedRest) {
+                this.noBallTouched = true
+                this.cushionTouchedAfterHittingBall = false
+                this.noBallTouchedRest = false
+            }
+            this.graphics.clear()
             this.cue.setVisible(false)
-            this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 420, ballPosition.y))
-        } else this.cue.setVisible(true)
+            this.cue.setToSleep()
+            this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
+        } else {
+            if (this.noBallTouched || !this.cushionTouchedAfterHittingBall) {
+                this.foulMade()
+                this.noBallTouched = false
+                this.cushionTouchedAfterHittingBall = true
+            }
+            this.cue.setAwake()
+            if (!this.cueBall.visible) {
+                this.cueBall.setPosition(342, 350)
+                ballPosition = this.cueBall.body.position
+                this.matter.body.setPosition(this.cue.body, this.matter.vector.create(this.cueBall.body.position.x - 410, this.cueBall.body.position.y))
+                this.cueBall.setVisible(true).setAwake()
+            }
+            // ballPosition.x + 1200, ballPosition.y
+            this.balls.forEach(ball => {
+                if (ball.body.position !== ballPosition) {
+                    let circle = new Phaser.Geom.Circle(ball.body.position.x, ball.body.position.y, 22.5)
+                    // console.log(circle.x)
+                    // console.log(ball.texture.key)
+                    // this.graphics.strokeCircle(circle.x, circle.y, circle.radius)
+                    this.circles.push(circle)
+                }
+            })
+            // console.log(this.circleID)
 
-        if (this.cursors.left.isDown) this.matter.body.rotate(this.cue.body, -Math.PI / 180, this.matter.vector.create(ballPosition.x, ballPosition.y))
-        else if (this.cursors.right.isDown) this.matter.body.rotate(this.cue.body, Math.PI / 180, this.matter.vector.create(ballPosition.x, ballPosition.y))
+            if (this.moveLine) {
+                ballPosition = this.cueBall.body.position
+                console.log(ballPosition.x, ballPosition.y)
+                this.line = new Phaser.Geom.Line(ballPosition.x, ballPosition.y, ballPosition.x + 1200, ballPosition.y)
+                this.helperLines = []
+                this.helperLines.push(this.line)
+                for (let i = 0; i < 25; i++) {
+                    let helperLineUp = new Phaser.Geom.Line(ballPosition.x, ballPosition.y - 22.5 + .9 * i, ballPosition.x + 1200, ballPosition.y - 22.5 + .9 * i)
+                    let helperLineDown = new Phaser.Geom.Line(ballPosition.x, ballPosition.y + .9 * (i + 1), ballPosition.x + 1200, ballPosition.y + .9 * (i + 1))
+                    this.helperLines.push(helperLineUp, helperLineDown)
+                    // this.graphics.strokeLineShape(helperLineUp)
+                    // this.graphics.strokeLineShape(helperLineDown)
+                }
+                console.log(this.helperLines)
+                this.graphics.strokeLineShape(this.line)
+                // this.graphics.strokeLineShape(this.helperLines[1])
+                // this.graphics.strokeLineShape(this.helperLines[this.helperLines.length - 1])
+                this.moveLine = false
+            }
+            this.cue.setVisible(true)
+            this.cue.setRotation(angle)
+        }
+        if (this.cursors.left.isDown) {
+            if (!moveCue) {
+                this.graphics.clear()
+                this.helperLines.forEach(helpLine => {
+                    Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, -Math.PI / 360)
+                })
+                this.graphics.strokeLineShape(this.line)
+                // this.graphics.strokeLineShape(this.helperLines[1])
+                // this.graphics.strokeLineShape(this.helperLines[this.helperLines.length - 1])
+            }
+            this.matter.body.rotate(this.cue.body, -Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
+        } else if (this.cursors.right.isDown) {
+            if (!moveCue) {
+                this.graphics.clear()
+                this.helperLines.forEach(helpLine => {
+                    Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, Math.PI / 360)
+                })
+                this.graphics.strokeLineShape(this.line)
+                // this.graphics.strokeLineShape(this.helperLines[1])
+                // this.graphics.strokeLineShape(this.helperLines[this.helperLines.length - 1])
+            }
+            this.matter.body.rotate(this.cue.body, Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
+        }
 
+        let minDist = 1e9
+        let pt
+        let circleCentre = []
 
+        this.circles.forEach(circle => {
+            this.helperLines.forEach(helpLine => {
+                let points = Phaser.Geom.Intersects.GetLineToCircle(helpLine, circle)
+                if (points.length) {
+                    if (Math.pow(points[0].x - ballPosition.x, 2) + Math.pow(points[0].y - ballPosition.y, 2) < minDist) {
+                        minDist = Math.pow(points[0].x - ballPosition.x, 2) + Math.pow(points[0].y - ballPosition.y, 2)
+                        pt = points[0]
+                        circleCentre = [circle.x, circle.y]
+                    }
+                }
+            })
+        })
+        // console.log(pt)
+        if (pt !== undefined) {
+            this.graphics.clear()
+            this.graphics.fillPoint(pt.x, pt.y, 3)
+            // this.graphics.strokeLineShape(this.line)
+            // this.graphics.strokeLineShape(this.helperLines[this.helperLines.length - 1])
+
+            // this.graphics.fillPoint(pt.x, pt.y, 10)
+            // let slope = Phaser.Geom.Line.Slope(this.line)
+            let centreLine = new Phaser.Geom.Line(pt.x, pt.y, circleCentre[0], circleCentre[1])
+            Phaser.Geom.Line.Extend(centreLine, -22.5, 50)
+            let angle = Phaser.Geom.Line.Angle(centreLine)
+            let centre = [pt.x - 15 * Math.cos(angle), pt.y - 15 * Math.sin(angle)]
+            this.line.x2 = centre[0]
+            this.line.y2 = centre[1]
+            this.guideCircle = new Phaser.Geom.Circle(centre[0], centre[1], 15)
+            this.graphics.strokeLineShape(this.line)
+            this.graphics.strokeLineShape(centreLine)
+            this.graphics.strokeCircle(this.guideCircle.x, this.guideCircle.y, this.guideCircle.radius)
+            /*Phaser.Geom.Line.Extend(centreLine, 100, 100)
+            let intersection = Phaser.Geom.Intersects.GetLineToLine(centreLine, this.line)
+            console.log(intersection.x)
+            console.log(intersection.y)*/
+            // centreLine.x1 = circleCentre.x
+            // centreLine.y1 = circleCentre.y
+            // console.log(slope)
+            // this.guideCircle = new Phaser.Geom.Circle(intersection.x, intersection.y, 22.5)
+            // this.guideCircle = new Phaser.Geom.Circle(pt.x - 22.5 * Math.cos(slope), pt.y - 22.5 * Math.sin(slope), 22.5)
+        }
+
+        if (this.cursors.down.isDown) {
+            console.log("power increasing")
+            this.hit = true
+            if (this.cursors.down.getDuration() <= 2000) {
+                let v1 = new Phaser.Math.Vector2(this.cue.body.position)
+                v1.subtract(new Phaser.Math.Vector2(this.cueBall.body.position))
+                let velocityV = v1.normalize().scale(3)
+                this.cue.setVelocity(velocityV.x, velocityV.y)
+            }
+        }
+        // console.log(this.hit)
+        if (this.cursors.down.isUp && this.hit) {
+            this.hit = false
+            let duration = this.cursors.down.duration
+            duration = Math.min(duration, 2000)
+            if (!moveCue) {
+                let speed = ((duration + this.f(duration)) * 1.25) / 600
+                speed = Math.min(speed, 4.5)
+                console.log("speed = ", speed)
+                // console.log(duration)
+                this.cueBall.setCollidesWith(this.cueBallCollidesWith)
+                this.cueBall.disableInteractive()
+                this.matter.applyForceFromAngle(this.cue.body, speed, angle - Math.PI / 2)
+                this.noBallTouchedRest = true
+            }
+        }
     }
 }
