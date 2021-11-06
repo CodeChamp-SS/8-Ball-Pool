@@ -277,7 +277,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         this.foulMade()
                     }
                 } else if (bodyA.collisionFilter.mask === cushion1.body.collisionFilter.mask || bodyB.collisionFilter.mask === cushion1.body.collisionFilter.mask) {
-                    if (bodyA.collisionFilter.mask == cushion1.body.collisionFilter.mask) {
+                    if (bodyA.collisionFilter.mask === cushion1.body.collisionFilter.mask) {
                         if (bodyB.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask && !this.noBallTouched) {
                             this.cushionTouchedAfterHittingBall = true
                         }

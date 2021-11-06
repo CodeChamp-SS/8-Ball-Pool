@@ -51,12 +51,12 @@ export default class Scene_9BallPool extends Phaser.Scene {
             'assets/cue.png',
             {frameWidth: 694, frameHeight: 20}
         );
-        this.load.audio('ball_collision', ['assets/sounds/ball_collision.mp3'])
+        /*this.load.audio('ball_collision', ['assets/sounds/ball_collision.mp3'])
         this.load.audio('cushion_collision', ['assets/sounds/cushion_collision.mp3'])
         this.load.audio('foul', ['assets/sounds/foul.mp3'])
         this.load.audio('pocket', ['assets/sounds/pocket.mp3'])
         this.load.audio('cue_collision_strong', ['assets/sounds/cue_collision_strong.mp3'])
-        this.load.audio('cue_collision_weak', ['assets/sounds/cue_collision_weak.mp3'])
+        this.load.audio('cue_collision_weak', ['assets/sounds/cue_collision_weak.mp3'])*/
     }
 
     createBall(x, y, key) {
@@ -99,7 +99,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
         })
         cushion.setRotation(angle)
         cushion.setVisible(false)
-        cushion.setBounce(0.8)
+        cushion.setBounce(0.9)
         cushion.setStatic(true)
         cushion.setFrictionStatic(0.1)
         cushion.displayHeight = height
@@ -195,12 +195,12 @@ export default class Scene_9BallPool extends Phaser.Scene {
 
         this.cursors = this.input.keyboard.createCursorKeys();
 
-        let ballCollision = this.sound.add('ball_collision', {loop: false})
+        /*let ballCollision = this.sound.add('ball_collision', {loop: false})
         let cueCollisionWeak = this.sound.add('cue_collision_weak', {loop: false})
         let cueCollisionStrong = this.sound.add('cue_collision_strong', {loop: false})
         let cushionCollision = this.sound.add('cushion_collision', {loop: false})
         this.foul = this.sound.add('foul', {loop: false})
-        let pocket = this.sound.add('pocket', {loop: false})
+        let pocket = this.sound.add('pocket', {loop: false})*/
 
         this.input.on('pointerdown', this.startDrag, this)
 
@@ -218,7 +218,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
                         let ball = bodyB.gameObject
                         console.log(bodyB.gameObject)
                         bodyB.gameObject.destroy()
-                        pocket.play()
+                        // pocket.play()
                         this.cushionTouchedAfterHittingBall = true
                         let index = this.balls.indexOf(ball);
                         if (index !== -1) {
@@ -232,7 +232,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
                         let ball = bodyA.gameObject
                         console.log(bodyA.gameObject)
                         bodyA.gameObject.destroy()
-                        pocket.play()
+                        // pocket.play()
                         this.cushionTouchedAfterHittingBall = true
                         let index = this.balls.indexOf(ball);
                         if (index !== -1) {
@@ -252,20 +252,25 @@ export default class Scene_9BallPool extends Phaser.Scene {
                             this.cushionTouchedAfterHittingBall = true
                         }
                     }
-                    cushionCollision.play()
+                    // cushionCollision.play()
                 } else if (bodyA.collisionFilter.mask === cueMask || bodyB.collisionFilter.mask === cueMask) {
-                    cueCollisionStrong.play()
+                    // cueCollisionStrong.play()
                 } else {
-                    ballCollision.play()
+                    // ballCollision.play()
                     this.noBallTouched = false
                 }
             });
         });
+
+        this.graphics = this.add.graphics({lineStyle: {width: 1, color: 0xffffff}});
+        this.graphics.alpha = 0.4
+        this.hit = false
+        this.moveLine = true
     }
 
     foulMade() {
         console.log("foul!!!")
-        this.foul.play()
+        // this.foul.play()
         this.cueBall.setVelocity(0, 0)
         this.cueBall.setToSleep().setInteractive().setVisible(false)
         this.cue.setToSleep()
@@ -420,7 +425,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
 
         if (pt !== undefined) {
             this.graphics.clear()
-            // this.graphics.fillPoint(pt.x, pt.y, 3)
+            this.graphics.fillPoint(pt.x, pt.y, 3)
 
             let centreLine = new Phaser.Geom.Line(pt.x, pt.y, circleCentre[0], circleCentre[1])
             Phaser.Geom.Line.Extend(centreLine, -22.5, 50)
