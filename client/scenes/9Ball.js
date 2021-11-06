@@ -70,8 +70,6 @@ export default class Scene_9BallPool extends Phaser.Scene {
         ball.setBounce(1);
         ball.setFriction(0.7, 0.01);
         if (key === 'ball_16') {
-            // ball.setVelocity(50, 0);
-            // ball.setAngularVelocity(0)
             this.cueBall = ball
             ball.setCollisionCategory(this.cueBallCategory)
         } else {
@@ -81,8 +79,6 @@ export default class Scene_9BallPool extends Phaser.Scene {
     }
 
     createBalls(){
-        //todo: change x,y of all balls acc to 9 ball style
-
         this.createBall(960, 350, 'ball_1')
         this.createBall(997, 370, 'ball_2')
         this.createBall(997, 325, 'ball_3')
@@ -92,7 +88,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
         this.createBall(1082, 327, 'ball_7')
         this.createBall(1120, 355, 'ball_8')
         this.createBall(1040, 350, 'ball_9')
-        this.createBall(350, 350, 'ball_16')
+        this.createBall(342, 350, 'ball_16')
     }
 
     createCushion(x, y, sideSlope, height, width, angle = 0) {
@@ -312,7 +308,6 @@ export default class Scene_9BallPool extends Phaser.Scene {
         let ballPosition = this.cueBall.body.position
         let moveCue = false
 
-        let pointer = this.input.activePointer;
         this.circles = []
 
         this.balls.forEach(ball => {
@@ -371,7 +366,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
                     // this.graphics.strokeLineShape(helperLineUp)
                     // this.graphics.strokeLineShape(helperLineDown)
                 }
-                console.log(this.helperLines)
+                // console.log(this.helperLines)
                 this.graphics.strokeLineShape(this.line)
                 // this.graphics.strokeLineShape(this.helperLines[1])
                 // this.graphics.strokeLineShape(this.helperLines[this.helperLines.length - 1])
