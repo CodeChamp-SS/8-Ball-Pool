@@ -91,7 +91,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
             radius: 22.5,
         });
         ball.setBounce(1);
-        ball.setFriction(0.7, 0.01);
+        ball.setFriction(0, 0.01, 0.2);
         if (key === 'ball_16') {
             // ball.setVelocity(50, 0);
             // ball.setAngularVelocity(0)
@@ -130,12 +130,13 @@ export default class Scene_8BallPool extends Phaser.Scene {
         })
         cushion.setRotation(angle)
         cushion.setVisible(false)
-        cushion.setBounce(0.8)
+        cushion.setBounce(0.9)
         cushion.setStatic(true)
         cushion.setFrictionStatic(0.1)
         cushion.displayHeight = height
         cushion.displayWidth = width
         cushion.setCollisionCategory(this.cushionCategory)
+        cushion.setCollidesWith([this.ballCategory, this.cueBallCategory])
         return cushion
     }
 
@@ -150,6 +151,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         pot.displayWidth = 45
         pot.setStatic(true)
         pot.setCollisionCategory(this.potCategory)
+        pot.setCollidesWith([this.ballCategory, this.cueBallCategory])
         return pot
     }
 
@@ -170,6 +172,9 @@ export default class Scene_8BallPool extends Phaser.Scene {
         let boundary = this.matter.world.setBounds(35, 25, 1375, 730, 1)
         boundary.disableGravity();
 
+        this.balls = []
+        this.createBalls()
+
         let cushion1 = this.createCushion(410, 55, -0.1, 65, 540)
         let cushion2 = this.createCushion(1045, 55, -0.1, 65, 540)
         let cushion3 = this.createCushion(1380, 390, -0.2, 505, 60, Math.PI / 2)
@@ -183,16 +188,8 @@ export default class Scene_8BallPool extends Phaser.Scene {
         let pot4 = this.createPot(1380, 710)
         let pot5 = this.createPot(728, 740)
         let pot6 = this.createPot(70, 710)
-
-        this.balls = []
-        this.createBalls()
-        pot1.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        pot2.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        pot3.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        pot4.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        pot5.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        pot6.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        let potMask = pot1.body.collisionFilter.mask
+        let potCategory = pot1.body.collisionFilter.category
+        console.log(pot1.body.collisionFilter, cushion1.body.collisionFilter)
 
         this.cue = this.matter.add.sprite(250, 370, 'cue')
         this.cue.setBody({
@@ -205,16 +202,9 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.cue.setRotation(Math.PI / 2)
         this.cue.setCollisionCategory(this.cueCategory)
         this.cue.setCollidesWith([this.cueBallCategory])
-        let cueMask = this.cue.body.collisionFilter.mask
-        let categories = [this.ballCategory, this.cueBallCategory, this.cushionCategory]
+        let cueMask = this.cue.body.collisionFilter.category
 
-        cushion1.setCollidesWith(categories)
-        cushion2.setCollidesWith(categories)
-        cushion3.setCollidesWith(categories)
-        cushion4.setCollidesWith(categories)
-        cushion5.setCollidesWith(categories)
-        cushion6.setCollidesWith(categories)
-        categories.push(this.potCategory)
+        let categories = [this.ballCategory, this.cueBallCategory, this.cushionCategory, this.potCategory]
         this.balls.forEach(ball => {
             ball.setCollidesWith(categories)
         })
@@ -245,10 +235,10 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.matter.world.on("collisionstart", (event) => {
             event.pairs.forEach((pair) => {
                 const {bodyA, bodyB} = pair;
-                // console.log(bodyA.collisionFilter.mask)
-                // console.log(bodyB.collisionFilter.mask)
-                if (bodyA.collisionFilter.mask === potMask) {
-                    if (bodyB.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask) {
+                // console.log(bodyA.collisionFilter.category)
+                // console.log(bodyB.collisionFilter.category)
+                if (bodyA.collisionFilter.category === potCategory) {
+                    if (bodyB.collisionFilter.category !== this.cueBall.body.collisionFilter.category) {
                         let ball = bodyB.gameObject
                         console.log(bodyB.gameObject)
                         bodyB.gameObject.destroy()
@@ -261,8 +251,8 @@ export default class Scene_8BallPool extends Phaser.Scene {
                     } else {
                         this.foulMade()
                     }
-                } else if (bodyB.collisionFilter.mask === potMask) {
-                    if (bodyA.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask) {
+                } else if (bodyB.collisionFilter.category === potCategory) {
+                    if (bodyA.collisionFilter.category !== this.cueBall.body.collisionFilter.category) {
                         let ball = bodyA.gameObject
                         console.log(bodyA.gameObject)
                         bodyA.gameObject.destroy()
@@ -276,18 +266,18 @@ export default class Scene_8BallPool extends Phaser.Scene {
                     } else {
                         this.foulMade()
                     }
-                } else if (bodyA.collisionFilter.mask === cushion1.body.collisionFilter.mask || bodyB.collisionFilter.mask === cushion1.body.collisionFilter.mask) {
-                    if (bodyA.collisionFilter.mask == cushion1.body.collisionFilter.mask) {
-                        if (bodyB.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask && !this.noBallTouched) {
+                } else if (bodyA.collisionFilter.category === cushion1.body.collisionFilter.category || bodyB.collisionFilter.category === cushion1.body.collisionFilter.category) {
+                    if (bodyA.collisionFilter.category == cushion1.body.collisionFilter.category) {
+                        if (bodyB.collisionFilter.category !== this.cueBall.body.collisionFilter.category && !this.noBallTouched) {
                             this.cushionTouchedAfterHittingBall = true
                         }
                     } else {
-                        if (bodyA.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask && !this.noBallTouched) {
+                        if (bodyA.collisionFilter.category !== this.cueBall.body.collisionFilter.category && !this.noBallTouched) {
                             this.cushionTouchedAfterHittingBall = true
                         }
                     }
                     cushionCollision.play()
-                } else if (bodyA.collisionFilter.mask === cueMask || bodyB.collisionFilter.mask === cueMask) {
+                } else if (bodyA.collisionFilter.category === cueMask || bodyB.collisionFilter.category === cueMask) {
                     cueCollisionStrong.play()
                 } else {
                     ballCollision.play()
