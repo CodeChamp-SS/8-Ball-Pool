@@ -1,7 +1,5 @@
-import Server from '../services/Server.js'
-import { IGameOverSceneData, IGameSceneData } from '../../types/scenes'
-import { IBall8PoolState, GameState } from '../../types/IBall8PoolState'
-import {ballCords} from '../../constants/ball8pool'
+import {ballCords} from '../constants/ball8pool.js'
+import GameState from '../constants/GameState.js'
 
 export default class Scene_8BallPoolMulti extends Phaser.Scene {
     constructor() {

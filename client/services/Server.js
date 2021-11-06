@@ -1,5 +1,5 @@
-import { IBall8PoolState,  GameState } from '../../types/IBall8PoolState'
-import { Message } from '../../types/messages'
+import Message from '../constants/Message.js'
+import GameState from '../constants/GameState.js'
 
 export default class Server {
     constructor() {
