@@ -1,4 +1,7 @@
 import Server from '../services/Server.js'
+import { IGameOverSceneData, IGameSceneData } from '../../types/scenes'
+import { IBall8PoolState, GameState } from '../../types/IBall8PoolState'
+import {ballCords} from '../../constants/ball8pool'
 
 export default class Scene_8BallPoolMulti extends Phaser.Scene {
     constructor() {
@@ -114,22 +117,25 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
     }
 
     createBalls() {
-        this.createBall(950, 350, 'ball_1')
-        this.createBall(1000, 320, 'ball_2')
-        this.createBall(1050, 290, 'ball_3')
-        this.createBall(1100, 260, 'ball_4')
-        this.createBall(1150, 230, 'ball_12')
-        this.createBall(1000, 380, 'ball_9')
-        this.createBall(1050, 410, 'ball_10')
-        this.createBall(1100, 440, 'ball_11')
-        this.createBall(1150, 470, 'ball_5')
-        this.createBall(1052, 350, 'ball_8')
-        this.createBall(1102, 320, 'ball_14')
-        this.createBall(1152, 290, 'ball_6')
-        this.createBall(1102, 380, 'ball_7')
-        this.createBall(1152, 410, 'ball_13')
-        this.createBall(1152, 350, 'ball_15')
-        this.createBall(342, 350, 'ball_16')
+        for(let i=0; i<16; i++) {
+            this.createBall(ballCords[i][0], ballCords[i][1], `ball_${i+1}`)
+        }
+        // this.createBall(950, 350, 'ball_1')
+        // this.createBall(1000, 320, 'ball_2')
+        // this.createBall(1050, 290, 'ball_3')
+        // this.createBall(1100, 260, 'ball_4')
+        // this.createBall(1150, 230, 'ball_12')
+        // this.createBall(1000, 380, 'ball_9')
+        // this.createBall(1050, 410, 'ball_10')
+        // this.createBall(1100, 440, 'ball_11')
+        // this.createBall(1150, 470, 'ball_5')
+        // this.createBall(1052, 350, 'ball_8')
+        // this.createBall(1102, 320, 'ball_14')
+        // this.createBall(1152, 290, 'ball_6')
+        // this.createBall(1102, 380, 'ball_7')
+        // this.createBall(1152, 410, 'ball_13')
+        // this.createBall(1152, 350, 'ball_15')
+        // this.createBall(342, 350, 'ball_16')
     }
 
     createCushion(x, y, sideSlope, height, width, angle = 0) {
@@ -312,6 +318,19 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         this.graphics.alpha = 0.4
         this.hit = false
         this.moveLine = true
+
+        //this.server?.onBoardChanged(this.handleBoardChanged, this)
+        if (this.server?.gameState === GameState.WaitingForPlayers)
+		{
+			const width = this.scale.width
+			this.gameStateText = this.add.text(width * 0.5, 50, 'Waiting for opponent...')
+				.setOrigin(0.5)
+		}
+        this.server?.onBoardChanged(this.handleBoardChanged, this)
+		this.server?.onPlayerTurnChanged(this.handlePlayerTurnChanged, this)
+		this.server?.onPlayerWon(this.handlePlayerWon, this)
+		this.server?.onGameStateChanged(this.handleGameStateChanged, this)
+        
     }
 
     foulMade() {

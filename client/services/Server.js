@@ -1,4 +1,13 @@
+import { IBall8PoolState,  GameState } from '../../types/IBall8PoolState'
+import { Message } from '../../types/messages'
+
 export default class Server {
+    constructor() {
+        this._playerIndex = -1
+        this.client = new Colyseus.Client('ws://localhost:2567')
+        this.events = new Phaser.Events.EventEmitter()
+    }
+    
     get playerIndex() {
         return this._playerIndex
     }
@@ -7,23 +16,17 @@ export default class Server {
         if (!this.room) {
             return GameState.WaitingForPlayers
         }
-
         return this.room?.state.gameState
-    }
-
-    constructor() {
-        this.client = new Colyseus.Client('ws://localhost:2567')
-        this.events = new Phaser.Events.EventEmitter()
     }
 
     async join() {
         this.room = await this.client.joinOrCreate('ball-8-pool')
         
         //message: { playerIndex: number }
-        // this.room.onMessage(Message.PlayerIndex, (message) => {
-        //     console.log(message.playerIndex)
-        //     this._playerIndex = message.playerIndex
-        // })
+        this.room.onMessage(Message.PlayerIndex, (message) => {
+            console.log(message.playerIndex)
+            this._playerIndex = message.playerIndex
+        })
 
         this.room.onStateChange.once(state => {
             this.events.emit('once-state-changed', state)
