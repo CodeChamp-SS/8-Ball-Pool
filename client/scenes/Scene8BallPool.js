@@ -91,7 +91,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
             radius: 22.5,
         });
         ball.setBounce(1);
-        ball.setFriction(0, 0.01, 0.2);
+        ball.setFriction(0.7, 0.01);
         if (key === 'ball_16') {
             // ball.setVelocity(50, 0);
             // ball.setAngularVelocity(0)
@@ -130,7 +130,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         })
         cushion.setRotation(angle)
         cushion.setVisible(false)
-        cushion.setBounce(0.9)
+        cushion.setBounce(0.8)
         cushion.setStatic(true)
         cushion.setFrictionStatic(0.1)
         cushion.displayHeight = height
