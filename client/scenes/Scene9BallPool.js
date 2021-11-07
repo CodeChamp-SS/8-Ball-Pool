@@ -6,6 +6,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
     preload() {
         this.scale.scaleMode = Phaser.Scale.CENTER_BOTH;
         this.load.image('board', 'assets/table.png');
+        this.load.image('gameOver', 'assets/gameOver.jpg')
         this.load.spritesheet('ball_1',
             'assets/ball_1.png',
             {frameWidth: 145, frameHeight: 141}
@@ -57,6 +58,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
         this.load.audio('pocket', ['assets/sounds/pocket.mp3'])
         this.load.audio('cue_collision_strong', ['assets/sounds/cue_collision_strong.mp3'])
         this.load.audio('cue_collision_weak', ['assets/sounds/cue_collision_weak.mp3'])
+        this.load.audio('game_over', ['assets/sounds/win.mp3'])
     }
 
     createBall(x, y, key) {
@@ -124,10 +126,10 @@ export default class Scene_9BallPool extends Phaser.Scene {
     }
 
     create() {
-        let board = this.add.image(0, 0, 'board');
-        board.setOrigin(0, 0)
-        board.displayWidth = this.sys.canvas.width
-        board.displayHeight = this.sys.canvas.height
+        this.board = this.add.image(0, 0, 'board');
+        this.board.setOrigin(0, 0)
+        this.board.displayWidth = this.sys.canvas.width
+        this.board.displayHeight = this.sys.canvas.height
 
         this.ballCategory = this.matter.world.nextCategory();
         this.cueCategory = this.matter.world.nextCategory();
@@ -203,6 +205,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
         let cushionCollision = this.sound.add('cushion_collision', {loop: false})
         this.foul = this.sound.add('foul', {loop: false})
         let pocket = this.sound.add('pocket', {loop: false})
+        this.gameOverSound = this.sound.add('game_over', {loop: false})
 
         this.input.on('pointerdown', this.startDrag, this)
 
@@ -223,10 +226,8 @@ export default class Scene_9BallPool extends Phaser.Scene {
                         if (ball.texture.key === 'ball_9') {
                             if (this.lowestBallHit) {
                                 //game over, player wins if shot was legit
-                                console.log("Game over, player wins")
-                                return
-                            }
-                            this.reset9Ball = true
+                                this.gameOver()
+                            } else this.reset9Ball = true
                         }
                         bodyB.gameObject.destroy()
                         this.cushionTouchedAfterHittingBall = true
@@ -246,10 +247,8 @@ export default class Scene_9BallPool extends Phaser.Scene {
                         if (ball.texture.key === 'ball_9') {
                             if (this.lowestBallHit) {
                                 //game over, player wins if shot was legit
-                                console.log("Game over, player wins")
-                                return
-                            }
-                            this.reset9Ball = true
+                                this.gameOver()
+                            } else this.reset9Ball = true
                         }
                         bodyA.gameObject.destroy()
                         this.cushionTouchedAfterHittingBall = true
@@ -322,6 +321,17 @@ export default class Scene_9BallPool extends Phaser.Scene {
         this.lowestBallHit = true
     }
 
+    gameOver() {
+        this.cueBall.destroy()
+        this.cue.destroy()
+        this.board = this.add.image(0, 0, 'gameOver');
+        this.board.setOrigin(0, 0)
+        this.board.displayWidth = this.sys.canvas.width
+        this.board.displayHeight = this.sys.canvas.height
+        this.gameOverSound.play()
+        console.log("Game over, player wins")
+    }
+
     startDrag(pointer, targets) {
         this.input.off('pointerdown', this.startDrag, this);
         this.dragTarget = targets[0]
@@ -355,6 +365,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
     }
 
     update() {
+        if (this.cueBall.body === undefined || this.cue.body === undefined) return
         let ballPosition = this.cueBall.body.position
         let moveCue = false
 
