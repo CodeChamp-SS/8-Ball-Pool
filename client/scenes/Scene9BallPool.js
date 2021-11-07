@@ -276,21 +276,21 @@ export default class Scene_9BallPool extends Phaser.Scene {
                 } else {
                     //cue ball to object ball
                     ballCollision.play()
-                    this.noBallTouched = false
+                    let lowestBall = this.balls[0]
+                    // console.log(lowestBall)
 
-                    let ballHit = this.balls[0]
-                    console.log(ballHit)
-
+                    console.log(lowestBall.texture.key)
                     if (bodyA.collisionFilter.category === this.cueBall.body.collisionFilter.category) {
-                        if (bodyB.collisionFilter.category === ballHit.body.collisionFilter.category && !this.lowestBallHit && this.noBallTouched) {
+                        if (bodyB.gameObject.texture.key === lowestBall.texture.key && !this.lowestBallHit && this.noBallTouched) {
                             this.lowestBallHit = true
                         }
                     } else if (bodyB.collisionFilter.category === this.cueBall.body.collisionFilter.category) {
-                        if (bodyA.collisionFilter.category === ballHit.body.collisionFilter.category && !this.lowestBallHit && this.noBallTouched) {
+                        if (bodyA.gameObject.texture.key === lowestBall.texture.key && !this.lowestBallHit && this.noBallTouched) {
                             this.lowestBallHit = true
                         }
                     }
                 }
+                this.noBallTouched = false
             });
         });
 
@@ -477,7 +477,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
             if (this.cursors.down.getDuration() <= 2000) {
                 let v1 = new Phaser.Math.Vector2(this.cue.body.position)
                 v1.subtract(new Phaser.Math.Vector2(this.cueBall.body.position))
-                let velocityV = v1.normalize().scale(1)
+                let velocityV = v1.normalize().scale(3)
                 this.cue.setVelocity(velocityV.x, velocityV.y)
             }
         }
@@ -488,7 +488,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
             duration = Math.min(duration, 2000)
             if (!moveCue) {
                 let speed = ((duration + this.f(duration)) * 1.25) / 600
-                speed = Math.min(speed, 3)
+                speed = Math.min(speed, 4.5)
                 console.log("speed = ", speed)
                 // console.log(duration)
                 this.cueBall.setCollidesWith(this.cueBallCollidesWith)
