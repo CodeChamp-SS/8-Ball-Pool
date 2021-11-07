@@ -1,4 +1,5 @@
 import Scene_8BallPool from './scenes/Scene8BallPool.js'
+import Scene_9BallPool from "./scenes/Scene9BallPool.js"
 
 var config = {
     type: Phaser.AUTO,
@@ -15,7 +16,7 @@ var config = {
             debug: true
         }
     },
-    scene: [Scene_8BallPool],
+    scene: [Scene_8BallPool, Scene_9BallPool],
 };
 
 var game = new Phaser.Game(config);
