@@ -1,13 +1,14 @@
 import {Schema, Context, ArraySchema, type} from "@colyseus/schema";
-import { ballCords } from "../../../constants/ball8pool";
-import { IBallPosition, IBall8PoolState,  GameState } from '../../../types/IBall8PoolState';
+import {ballCords} from "../../../constants/ball8pool";
+import {IBallPosition, IBall8PoolState, GameState} from '../../../types/IBall8PoolState';
 
 
-class BallPosition extends Schema implements IBallPosition{
-    @type("boolean") isPotted : boolean;
+class BallPosition extends Schema implements IBallPosition {
+    @type("boolean") isPotted: boolean;
     @type("number") x: number;
     @type("number") y: number;
-    constructor(x : number, y : number, isPotted = false){
+
+    constructor(x: number, y: number, isPotted = false) {
         super();
         this.x = x;
         this.y = y;
@@ -41,8 +42,8 @@ export class Ball8PoolState extends Schema implements IBall8PoolState {
     constructor() {
         super()
         //initial state values
-        this.balls = new ArraySchema<BallPosition>() 
-        ballCords.forEach((ball)=>{
+        this.balls = new ArraySchema<BallPosition>()
+        ballCords.forEach((ball) => {
             // const ballPosition: IBallPosition = {
             //     isPotted: false,
             //     x: ball[0],

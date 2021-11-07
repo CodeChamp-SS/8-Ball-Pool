@@ -1,5 +1,4 @@
-export enum Message
-{
-	PlayerStateData,
-	PlayerIndex
+export enum Message {
+    PlayerStateData,
+    PlayerIndex
 }
