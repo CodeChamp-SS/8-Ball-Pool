@@ -3,7 +3,7 @@ import {ballCords} from "../../../constants/ball8pool";
 import {IBallPosition, IBall8PoolState, GameState} from '../../../types/IBall8PoolState';
 
 
-class BallPosition extends Schema implements IBallPosition {
+export class BallPosition extends Schema implements IBallPosition {
     @type("boolean") isPotted: boolean;
     @type("number") x: number;
     @type("number") y: number;

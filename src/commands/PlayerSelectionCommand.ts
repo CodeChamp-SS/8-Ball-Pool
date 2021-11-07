@@ -2,6 +2,8 @@ import {Command} from '@colyseus/command'
 import {Client} from 'colyseus'
 import {IBall8PoolState, GameState} from '../../types/IBall8PoolState'
 
+import {BallPosition, Ball8PoolState} from '../rooms/schema/Ball8PoolState'
+
 //import CheckWinnerCommand from './CheckWinnerCommand'
 
 type Payload = {
@@ -24,7 +26,15 @@ export default class PlayerSelectionCommand extends Command<IBall8PoolState, Pay
 
         //set state values here on the basis of psdata
 
-        this.room.state.balls = psdata.balls
+        //this.room.state.balls = psdata.balls
+
+		let newBalls : any = []
+		psdata.balls.forEach((ball : any) => {
+			let newBall = new BallPosition(ball.x,ball.y,ball.isPotted)
+			newBalls.push(newBall)
+		})
+
+		this.room.state.balls = newBalls
 
         // return [
         // 	new CheckWinnerCommand()
