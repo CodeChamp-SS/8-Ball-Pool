@@ -19,6 +19,10 @@ export default class Server {
         return this.room?.state.gameState
     }
 
+    isCurrentPlayerTurn(){
+        return this.playerIndex === this.room.state.activePlayer
+    }
+
     async join() {
         this.room = await this.client.joinOrCreate('ball-8-pool')
         
@@ -83,7 +87,25 @@ export default class Server {
 
         //send data to the server via messages
         //this.room.send(Message.PlayerStateData, {data})
-        this.room.send("0", {data})
+        this.room.send(Message.PlayerStateData, {data})
+    }
+
+    setPlayerTurnData(data) {
+        if (!this.room) {
+            return
+        }
+
+        if (this.room.state.gameState !== GameState.Playing) {
+            return
+        }
+
+        if (this.playerIndex !== this.room.state.activePlayer) {
+            console.warn('not this player\'s turn')
+            return
+        }
+
+        //send data to the server via messages
+        this.room.send(Message.PlayerTurnData, {data})
     }
     
     //state: IBall8PoolState

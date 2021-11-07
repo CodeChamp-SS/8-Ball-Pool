@@ -399,6 +399,10 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
 
     
     async update() {
+        if(this.server ===  null || !this.server.isCurrentPlayerTurn()){
+            return
+        }
+
         let ballPosition = this.cueBall.body.position
         let moveCue = false
 
@@ -483,6 +487,8 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
             }
             this.cue.setVisible(true)
             this.cue.setRotation(angle)
+            if(this.server !== null) this.server.setPlayerTurnData(true)
+
         }
         if (this.cursors.left.isDown) {
             if (!moveCue) {
@@ -568,12 +574,24 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
     
     //newValue: newdata
     handleBoardChanged(newValue){
-        console.log("board changed called, newValue:", newValue)
+        if(this.server ===  null || this.server.isCurrentPlayerTurn()){
+            return
+        }
+        //console.log("board changed called, newValue:", newValue)
+        for (let i = 0; i < newValue.length; i++) {
+            // console.log(newValue[i].x, newValue[i].y)
+            //console.log("hello")
+            this.balls[i].body.position.x = newValue[i].x
+            this.balls[i].body.position.y = newValue[i].y
+        }
     }
 
     handlePlayerTurnChanged(playerIndex){
         console.log("player turn changed to " + playerIndex)
     }
+
+    //if(this.server !== null) this.server.setPlayerTurnData(true)
+    //if(this.server !== null) this.server.isCurrentPlayerTurn()
 
 
 

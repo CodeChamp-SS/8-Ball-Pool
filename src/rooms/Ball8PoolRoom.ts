@@ -1,8 +1,9 @@
 import {Room, Client} from "colyseus";
 import {Ball8PoolState} from "./schema/Ball8PoolState";
 import {Dispatcher} from '@colyseus/command'
-import {Message} from '../../types/messages'
+import Message from '../../types/messages'
 import PlayerSelectionCommand from '../commands/PlayerSelectionCommand'
+import NextTurnCommand from '../commands/NextTurnCommand'
 import {GameState} from '../../types/IBall8PoolState'
 
 export class Ball8PoolRoom extends Room<Ball8PoolState> {
@@ -21,14 +22,22 @@ export class Ball8PoolRoom extends Room<Ball8PoolState> {
                 client,
                 psdata: message.data
             })
-        });
+        })
+        this.onMessage("2", (client, message) => {
+          //dispatch the command to update active player value
+          this.dispatcher.dispatch(new NextTurnCommand(), {
+            client,
+            changeTurn : message.data
+          })
+        })
+
     }
 
     onJoin(client: Client, options: any) {
         console.log(client.sessionId, "joined!");
         const idx = this.clients.findIndex(c => c.sessionId === client.sessionId)
         console.log(idx)
-        client.send(Message.PlayerIndex, {playerIndex: idx})
+        client.send("1", {playerIndex: idx})
 
         if (this.clients.length >= 2) {
             this.state.gameState = GameState.Playing

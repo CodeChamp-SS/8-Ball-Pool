@@ -4,6 +4,7 @@ import {IBall8PoolState, GameState} from '../../types/IBall8PoolState'
 
 import {BallPosition, Ball8PoolState} from '../rooms/schema/Ball8PoolState'
 
+import NextTurnCommand from './NextTurnCommand'
 //import CheckWinnerCommand from './CheckWinnerCommand'
 
 type Payload = {
@@ -25,8 +26,6 @@ export default class PlayerSelectionCommand extends Command<IBall8PoolState, Pay
         }
 
         //set state values here on the basis of psdata
-
-        //this.room.state.balls = psdata.balls
 
 		let newBalls : any = []
 		psdata.balls.forEach((ball : any) => {
