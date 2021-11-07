@@ -20,4 +20,5 @@ const config = {
     scene: [Bootstrap, Scene_8BallPool, GameOver]
 }
 
-export default new Phaser.Game(config)
+//export default new Phaser.Game(config)
+const game = new Phaser.Game(config)

@@ -1,5 +1,5 @@
 const Message = {
-	PlayerSelection : 0,
+	PlayerStateData : 0,
 	PlayerIndex : 1
 }
 

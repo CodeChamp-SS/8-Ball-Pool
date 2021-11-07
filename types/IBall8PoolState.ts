@@ -18,7 +18,7 @@ export interface IBall8PoolState extends Schema
 {
 	gameState: GameState
 	
-	balls: ArraySchema<IBallPosition>
+	balls: any
 
 	ballsPotted: ArraySchema<number>
 

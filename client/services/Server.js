@@ -38,9 +38,9 @@ export default class Server {
                 const {field, value} = change
 
                 switch (field) {
-                    // case 'balls':
-                    // 	this.events.emit('board-changed', value)
-                    // 	break
+                    case 'balls':
+                    	this.events.emit('board-changed', value)
+                    	break
 
                     case 'activePlayer':
                         this.events.emit('player-turn-changed', value)
@@ -57,17 +57,17 @@ export default class Server {
             })
         }
 
-        this.room.state.balls.onChange = (item, idx) => {
-            this.events.emit('board-changed', item, idx)
-        }
+        // this.room.state.balls.onChange = (item, idx) => {
+        //     this.events.emit('board-changed', item, idx)
+        // }
     }
 
     leave() {
         this.room?.leave()
         this.events.removeAllListeners()
     }
-    //idx: number
-    makeSelection(idx) {
+    
+    setStateData(data) {
         if (!this.room) {
             return
         }
@@ -81,7 +81,9 @@ export default class Server {
             return
         }
 
-        this.room.send(Message.PlayerSelection, {index: idx})
+        //send data to the server via messages
+        //this.room.send(Message.PlayerStateData, {data})
+        this.room.send("0", {data})
     }
     
     //state: IBall8PoolState

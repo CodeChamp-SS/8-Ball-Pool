@@ -179,11 +179,18 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         if (!this.server) {
             throw new Error('server instance missing')
         }
-
+        
         await this.server.join()
 
-        //this.server.onceStateChanged(this.createBoard, this)
+        this.server.onceStateChanged(this.createBoard, this)
+    }
 
+    //call when needed to set the state: 
+    //1/ if(this.server !== null) this.server.setStateData()  
+    //2/ if(this.server !== null) this.server.onBoardChanged(this.handleBoardChanged, this)
+
+    createBoard(state){
+        console.log(state)
         let board = this.add.image(0, 0, 'board');
         board.setOrigin(0, 0)
         board.displayWidth = this.sys.canvas.width
@@ -201,6 +208,24 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         boundary.disableGravity();
 
         this.balls = []
+        this.potted = {
+            'ball_1': false,
+            'ball_2': false,
+            'ball_3': false,
+            'ball_4': false,
+            'ball_5': false,
+            'ball_6': false,
+            'ball_7': false,
+            'ball_8': false,
+            'ball_9': false,
+            'ball_10': false,
+            'ball_11': false,
+            'ball_12': false,
+            'ball_13': false,
+            'ball_14': false,
+            'ball_15': false,
+            'ball_16': false
+        }
         this.createBalls()
 
         let cushion1 = this.createCushion(410, 55, -0.1, 65, 540)
@@ -274,6 +299,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
                         if (index !== -1) {
                             this.balls.splice(index, 1);
                         }
+                        this.potted[ball.texture.key] = true
                     } else {
                         this.foulMade()
                     }
@@ -289,6 +315,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
                             this.balls.splice(index, 1);
                             this.input.on('pointerDown', this.startDrag, this)
                         }
+                        this.potted[ball.texture.key] = true
                     } else {
                         this.foulMade()
                     }
@@ -317,18 +344,16 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         this.hit = false
         this.moveLine = true
 
-        //this.server?.onBoardChanged(this.handleBoardChanged, this)
-        if (this.server?.gameState === GameState.WaitingForPlayers)
+        if (this.server !==null && this.server.gameState === GameState.WaitingForPlayers)
 		{
 			const width = this.scale.width
 			this.gameStateText = this.add.text(width * 0.5, 50, 'Waiting for opponent...')
 				.setOrigin(0.5)
 		}
-        this.server?.onBoardChanged(this.handleBoardChanged, this)
-		this.server?.onPlayerTurnChanged(this.handlePlayerTurnChanged, this)
-		this.server?.onPlayerWon(this.handlePlayerWon, this)
-		this.server?.onGameStateChanged(this.handleGameStateChanged, this)
-        
+        if(this.server !== null) this.server.onBoardChanged(this.handleBoardChanged, this)
+		if(this.server !== null) this.server.onPlayerTurnChanged(this.handlePlayerTurnChanged, this)
+		//this.server?.onPlayerWon(this.handlePlayerWon, this)
+		//this.server?.onGameStateChanged(this.handleGameStateChanged, this)
     }
 
     foulMade() {
@@ -372,6 +397,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         return 50 / Math.pow(3, x) + 25
     }
 
+    
     async update() {
         let ballPosition = this.cueBall.body.position
         let moveCue = false
@@ -379,11 +405,31 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         let pointer = this.input.activePointer;
         this.circles = []
 
+        let ballsState = {
+           balls : [],
+           potted : []
+        } 
+
         this.balls.forEach(ball => {
             if (Math.abs(ball.body.velocity.x) > 1e-2 || Math.abs(ball.body.velocity.y) > 1e-2) {
                 moveCue = true
             }
+            let bp = {
+                x: ball.body.position.x,
+                y: ball.body.position.y,
+                isPotted : false
+            }
+
+            ballsState.balls.push(bp)
         })
+
+        Object.keys(this.potted).forEach((key) => {
+            if (this.potted[key]) {
+                ballsState.potted.push(parseInt(key[5]))
+            }
+        })
+
+        if(this.server !== null) this.server.setStateData(ballsState)
 
         let cuePosition = this.cue.body.position
         let velocityVector = new Phaser.Math.Vector2(ballPosition.x - cuePosition.x, ballPosition.y - cuePosition.y)
@@ -519,6 +565,17 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
             }
         }
     }
+    
+    //newValue: newdata
+    handleBoardChanged(newValue){
+        console.log("board changed called, newValue:", newValue)
+    }
+
+    handlePlayerTurnChanged(playerIndex){
+        console.log("player turn changed to " + playerIndex)
+    }
+
+
 
     // private handleBoardChanged(newValue: Cell, idx: number)
     // {

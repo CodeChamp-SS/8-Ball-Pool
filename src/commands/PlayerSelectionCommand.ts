@@ -6,14 +6,14 @@ import { IBall8PoolState, GameState } from '../../types/IBall8PoolState'
 
 type Payload = {
 	client: Client
-	index: number
+	psdata: any
 }
 
 export default class PlayerSelectionCommand extends Command<IBall8PoolState, Payload>
 {
 	execute(data: Payload)
 	{
-		const { client, index } = data
+		const { client, psdata } = data
 
 		if (this.room.state.gameState !== GameState.Playing)
 		{
@@ -26,10 +26,9 @@ export default class PlayerSelectionCommand extends Command<IBall8PoolState, Pay
 			return
 		}
 		
-		//set values here
+		//set state values here on the basis of psdata
         
-        //const cellValue = clientIndex === 0 ? Cell.X : Cell.O
-		//this.room.state.board[index] = cellValue
+		this.room.state.balls = psdata.balls
 
 		// return [
 		// 	new CheckWinnerCommand()

@@ -13,10 +13,13 @@ export class Ball8PoolRoom extends Room<Ball8PoolState> {
     this.maxClients = 2
     this.setState(new Ball8PoolState());
 
-    this.onMessage("type", (client, message) => {
+    //receive message
+    //Message.PlayerStateData
+    this.onMessage("0", (client, message) => {
+      //dispatch the command to update state value
       this.dispatcher.dispatch(new PlayerSelectionCommand(), {
 				client,
-				index: message.index
+				psdata: message.data
 			})
     });
   }

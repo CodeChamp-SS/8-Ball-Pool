@@ -3,13 +3,25 @@ import { ballCords } from "../../../constants/ball8pool";
 import { IBallPosition, IBall8PoolState,  GameState } from '../../../types/IBall8PoolState';
 
 
+class BallPosition extends Schema implements IBallPosition{
+    @type("boolean") isPotted : boolean;
+    @type("number") x: number;
+    @type("number") y: number;
+    constructor(x : number, y : number, isPotted = false){
+        super();
+        this.x = x;
+        this.y = y;
+        this.isPotted = isPotted;
+    }
+}
+
 
 export class Ball8PoolState extends Schema implements IBall8PoolState {
     @type('number')
     gameState = GameState.WaitingForPlayers
 
-    @type(['number'])
-    balls: ArraySchema<IBallPosition>
+    @type([BallPosition])
+    balls: ArraySchema<BallPosition>
 
     @type(['number'])
     ballsPotted: ArraySchema<number>
@@ -29,13 +41,14 @@ export class Ball8PoolState extends Schema implements IBall8PoolState {
     constructor() {
         super()
         //initial state values
-        this.balls = new ArraySchema() 
+        this.balls = new ArraySchema<BallPosition>() 
         ballCords.forEach((ball)=>{
-            this.balls.push({
-                x: ball[0],
-                y: ball[1],
-                isPotted: false
-            })
+            // const ballPosition: IBallPosition = {
+            //     isPotted: false,
+            //     x: ball[0],
+            //     y: ball[1]
+            // }
+            this.balls.push(new BallPosition(ball[0], ball[1]))
         })
         this.ballsPotted = new ArraySchema()
         this.isWhitePotted = false
