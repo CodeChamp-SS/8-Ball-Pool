@@ -408,9 +408,9 @@ export default class Scene_9BallPool extends Phaser.Scene {
             // this.lowestBallHit = false
             if (this.noBallTouched || !this.cushionTouchedAfterHittingBall || !this.lowestBallHit) {
                 this.foulMade()
-                if (this.gameStarted) {
+                /*if (this.gameStarted) {
                     this.breakShot = true
-                }
+                }*/
                 this.noBallTouched = false
                 this.cushionTouchedAfterHittingBall = true
                 this.lowestBallHit = true
