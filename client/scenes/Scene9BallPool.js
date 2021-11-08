@@ -89,7 +89,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
         this.createBall(1082, 327, 'ball_7')
         this.createBall(1120, 355, 'ball_8')
         this.createBall(1040, 350, 'ball_9')
-        this.createBall(342, 350, 'ball_16')
+        this.createBall(370, 350, 'ball_16')
     }
 
     createCushion(x, y, sideSlope, height, width, angle = 0) {
@@ -204,7 +204,10 @@ export default class Scene_9BallPool extends Phaser.Scene {
         this.foul = this.sound.add('foul', {loop: false})
         let pocket = this.sound.add('pocket', {loop: false})
 
+        this.breakShot = true
+        this.gameStarted = true
         this.input.on('pointerdown', this.startDrag, this)
+        this.cueBall.setInteractive()
 
         this.noBallTouched = false
         this.noBallTouchedRest = true
@@ -295,7 +298,6 @@ export default class Scene_9BallPool extends Phaser.Scene {
                     }
                     this.noBallTouched = false
                 }
-                // this.noBallTouched = false
             });
         });
 
@@ -317,9 +319,9 @@ export default class Scene_9BallPool extends Phaser.Scene {
             this.createBall(1040, 350, 'ball_9')
             this.reset9Ball = false
         }
-        this.noBallTouched = false
-        this.cushionTouchedAfterHittingBall = true
-        this.lowestBallHit = true
+        // this.noBallTouched = false
+        // this.cushionTouchedAfterHittingBall = true
+        // this.lowestBallHit = true
     }
 
     startDrag(pointer, targets) {
@@ -341,6 +343,13 @@ export default class Scene_9BallPool extends Phaser.Scene {
         this.input.off('pointermove', this.doDrag, this);
         this.input.off('pointerup', this.stopDrag, this);
         let ballPosition = this.cueBall.body.position
+        console.log(this.breakShot)
+        if (this.breakShot){
+            if (ballPosition.x >= 370) {
+                console.log('position reset')
+                this.cueBall.setPosition(370, ballPosition.y)
+            }
+        }
         this.graphics.clear()
         // console.log(ballPosition.x, ballPosition.y)
         this.line = new Phaser.Geom.Line(ballPosition.x, ballPosition.y, ballPosition.x + 1200, ballPosition.y)
@@ -383,10 +392,20 @@ export default class Scene_9BallPool extends Phaser.Scene {
             this.cue.setVisible(false)
             this.cue.setToSleep()
             this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
+            this.breakShot = false
         } else {
             // this.lowestBallHit = false
             if (this.noBallTouched || !this.cushionTouchedAfterHittingBall || !this.lowestBallHit) {
                 this.foulMade()
+                if (this.gameStarted) {
+                    this.breakShot = true
+                }
+                this.noBallTouched = false
+                this.cushionTouchedAfterHittingBall = true
+                this.lowestBallHit = true
+            }
+            if (!this.breakShot){
+                this.gameStarted = false
             }
             this.cue.setAwake()
             if (!this.cueBall.visible) {
