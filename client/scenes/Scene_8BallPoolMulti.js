@@ -399,6 +399,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
 
     
     async update() {
+        console.log(this.server.isCurrentPlayerTurn())
         if(this.server ===  null || !this.server.isCurrentPlayerTurn()){
             return
         }
@@ -487,7 +488,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
             }
             this.cue.setVisible(true)
             this.cue.setRotation(angle)
-            if(this.server !== null) this.server.setPlayerTurnData(true)
+            //if(this.server !== null) this.server.setPlayerTurnData(true)
 
         }
         if (this.cursors.left.isDown) {

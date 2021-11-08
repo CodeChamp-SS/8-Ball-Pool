@@ -20,7 +20,10 @@ export default class Server {
     }
 
     isCurrentPlayerTurn(){
-        return this.playerIndex === this.room.state.activePlayer
+        if (!this.room) {
+            return true
+        }
+        return this.playerIndex === this.room?.state.activePlayer
     }
 
     async join() {
