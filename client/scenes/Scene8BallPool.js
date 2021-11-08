@@ -307,6 +307,17 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.noBallTouched = false
     }
 
+    gameOver() {
+        this.cueBall.destroy()
+        this.cue.destroy()
+        this.board = this.add.image(0, 0, 'gameOver');
+        this.board.setOrigin(0, 0)
+        this.board.displayWidth = this.sys.canvas.width
+        this.board.displayHeight = this.sys.canvas.height
+        this.gameOverSound.play()
+        console.log("Game over, player wins")
+    }
+
     startDrag(pointer, targets) {
         this.input.off('pointerdown', this.startDrag, this);
         this.dragTarget = targets[0]
