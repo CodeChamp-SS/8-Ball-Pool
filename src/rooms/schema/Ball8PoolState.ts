@@ -27,8 +27,8 @@ export class Ball8PoolState extends Schema implements IBall8PoolState {
     @type(HitParams)
     hit: HitParams
 
-    @type('number')
-    cueFinalPosition : number
+    @type(['number'])
+    cueFinalPosition : ArraySchema<number>
 
     @type(['number'])
     ballsPotted: ArraySchema<number>
@@ -52,6 +52,6 @@ export class Ball8PoolState extends Schema implements IBall8PoolState {
         this.isWhitePotted = false
         this.isBlackPotted = false
         this.hit = new HitParams()
-        this.cueFinalPosition = 0
+        this.cueFinalPosition = new ArraySchema()
     }
 }

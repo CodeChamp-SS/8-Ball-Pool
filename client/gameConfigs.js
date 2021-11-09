@@ -10,7 +10,7 @@ const config = {
         default: 'matter',
         matter: {
             gravity: {y: 0},
-            debug: false
+            debug: true
         },
         arcade: {
             gravity: {y: 0},

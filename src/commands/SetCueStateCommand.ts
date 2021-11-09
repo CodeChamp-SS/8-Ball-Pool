@@ -23,7 +23,7 @@ export default class SetCueStateCommand extends Command<IBall8PoolState, Payload
 
         //set state values here on the basis of psdata
 
-        console.log(cueFinalPosition)
+        // console.log(cueFinalPosition)
         this.room.state.cueFinalPosition = cueFinalPosition
 
         // return [

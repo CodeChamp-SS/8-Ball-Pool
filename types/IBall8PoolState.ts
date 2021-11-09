@@ -20,7 +20,7 @@ export interface IBall8PoolState extends Schema {
 
     hit: any
 
-    cueFinalPosition : number
+    cueFinalPosition : ArraySchema<number>
 
     ballsPotted: ArraySchema<number>
 

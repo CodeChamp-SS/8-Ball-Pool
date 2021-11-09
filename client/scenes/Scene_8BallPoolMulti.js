@@ -343,7 +343,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         this.graphics.alpha = 0.4
         this.hit = false
         this.moveLine = true
-        this.it = 0
+        this.cuePositionReset = false
 
         if (this.server !== null && this.server.gameState === GameState.WaitingForPlayers) {
             const width = this.scale.width
@@ -352,6 +352,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         }
         if (this.server !== null) this.server.onBoardChanged(this.handleBoardChanged, this)
         if (this.server !== null) this.server.onPlayerTurnChanged(this.handlePlayerTurnChanged, this)
+        if (this.server !== null) this.server.onCuePositionChanged(this.handleCuePositionChanged, this)
         //this.server?.onPlayerWon(this.handlePlayerWon, this)
         //this.server?.onGameStateChanged(this.handleGameStateChanged, this)
     }
@@ -440,6 +441,10 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
             this.cue.setVisible(false)
             this.cue.setToSleep()
             this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
+            if (this.server !== null) {
+                this.server.setCueStateData([this.cue.body.position.x, this.cue.body.position.y])
+                // this.cuePositionReset = false
+            }
         } else {
             if (this.noBallTouched || !this.cushionTouchedAfterHittingBall) {
                 this.foulMade()
@@ -481,6 +486,10 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
             }
             this.cue.setVisible(true)
             this.cue.setRotation(angle)
+            if (this.server !== null) {
+                this.server.setCueStateData([angle])
+                // this.cuePositionReset = false
+            }
             //if(this.server !== null) this.server.setPlayerTurnData(true)
 
         }
@@ -494,6 +503,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
             }
             newData.cueAngle -= Math.PI / 360
             this.matter.body.rotate(this.cue.body, -Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
+            if (this.server !== null) this.server.setCueStateData([-Math.PI / 360, -Math.PI / 360, -Math.PI / 360])
         } else if (this.cursors.right.isDown) {
             if (!moveCue) {
                 this.graphics.clear()
@@ -504,6 +514,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
             }
             newData.cueAngle += Math.PI / 360
             this.matter.body.rotate(this.cue.body, Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
+            if (this.server !== null) this.server.setCueStateData([Math.PI / 360, Math.PI / 360, Math.PI / 360])
         }
 
         let minDist = 1e9
@@ -548,11 +559,9 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
                 let velocityV = v1.normalize().scale(3)
                 this.cue.setVelocity(velocityV.x, velocityV.y)
                 console.log(this.cue.body.position)
-                this.it += 1
                 // console.log("velocity set")
             }
         }
-        if(this.it > 0) console.log(this.it)
         // console.log(this.hit)
         if (this.cursors.down.isUp && this.hit) {
             this.hit = false
@@ -573,7 +582,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
                 this.matter.applyForceFromAngle(this.cue.body, speed, angle - Math.PI / 2)
                 if (this.server !== null) this.server.setStateData(newData)
                 this.noBallTouchedRest = true
-                this.it = 0
+                this.cuePositionReset = true
             }
         }
     }
@@ -587,9 +596,13 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         //console.log("board changed called, newValue:", newValue)
         console.log(newValue.cueAngle, newValue.delAngle, newValue.hitSpeed, newValue.duration)
         let ballPosition = this.cueBall.body.position
-
+        this.cue.setVisible(true)
         this.cue.setRotation(newValue.delAngle)
         this.matter.body.rotate(this.cue.body, newValue.cueAngle, this.matter.vector.create(ballPosition.x, ballPosition.y))
+
+        let context = this
+        context.matter.body.setPosition(context.cue.body, context.matter.vector.create(newValue.x, newValue.y))
+        context.matter.applyForceFromAngle(context.cue.body, newValue.hitSpeed, newValue.delAngle - Math.PI / 2)
 
         // let start = performance.now()
         // while (1) {
@@ -606,10 +619,8 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         //     this.cue.setPosition(-240, 350)
         // }
 
-        var start = performance.now();
-        let context = this
-        this.matter.body.setPosition(this.cue.body, this.matter.vector.create(newValue.x, newValue.y))
-        context.matter.applyForceFromAngle(context.cue.body, newValue.hitSpeed, newValue.delAngle - Math.PI / 2)
+        // var start = performance.now();
+
 
         // let it = 0
         // var timer_id = setInterval(function () {
@@ -625,6 +636,22 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         //         ++it
         //     }
         // }, 1);
+    }
+
+    handleCuePositionChanged(newValue) {
+        if (this.server === null || this.server.isCurrentPlayerTurn()) {
+            return
+        }
+        // this.cue.setVisible(false)
+        if (newValue.length === 1) {
+            this.cue.setRotation(newValue[0])
+        } else if (newValue.length === 3) {
+            let ballPosition = this.cueBall.body.position
+            this.matter.body.rotate(this.cue.body, newValue[0], this.matter.vector.create(ballPosition.x, ballPosition.y))
+        } else {
+            console.log(newValue[0], newValue[1])
+            this.matter.body.setPosition(this.cue.body, this.matter.vector.create(newValue[0], newValue[1]))
+        }
     }
 
     handlePlayerTurnChanged(playerIndex) {
