@@ -20,6 +20,8 @@ export interface IBall8PoolState extends Schema {
 
     hit: any
 
+    cueFinalPosition : number
+
     ballsPotted: ArraySchema<number>
 
     isWhitePotted: boolean

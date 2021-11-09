@@ -5,6 +5,7 @@ import Message from '../../types/messages'
 import PlayerSelectionCommand from '../commands/PlayerSelectionCommand'
 import NextTurnCommand from '../commands/NextTurnCommand'
 import {GameState} from '../../types/IBall8PoolState'
+import SetCueStateCommand from "../commands/SetCueStateCommand";
 
 export class Ball8PoolRoom extends Room<Ball8PoolState> {
 
@@ -29,6 +30,13 @@ export class Ball8PoolRoom extends Room<Ball8PoolState> {
             client,
             changeTurn : message.data
           })
+        })
+        this.onMessage("3", (client, message) => {
+            //dispatch the command to update active player value
+            this.dispatcher.dispatch(new SetCueStateCommand(), {
+              client,
+              cueFinalPosition : message.data
+            })
         })
 
     }

@@ -49,6 +49,10 @@ export default class Server {
                         this.events.emit('board-changed', value)
                         break
 
+                    case 'cueFinalPosition':
+                        this.events.emit('cue-position-changed', value)
+                        break
+
                     case 'activePlayer':
                         this.events.emit('player-turn-changed', value)
                         break
@@ -93,6 +97,25 @@ export default class Server {
         this.room.send(Message.PlayerStateData, {data})
     }
 
+    setCueStateData(data) {
+        if (!this.room) {
+            return
+        }
+
+        if (this.room.state.gameState !== GameState.Playing) {
+            return
+        }
+
+        if (this.playerIndex !== this.room.state.activePlayer) {
+            console.warn('not this player\'s turn')
+            return
+        }
+
+        //send data to the server via messages
+        //this.room.send(Message.PlayerStateData, {data})
+        this.room.send(Message.PlayerCueStateData, {data})
+    }
+
     setPlayerTurnData(data) {
         if (!this.room) {
             return
@@ -120,6 +143,10 @@ export default class Server {
     //cb: (cell: number, index: number) => void, context?: any
     onBoardChanged(cb, context) {
         this.events.on('board-changed', cb, context)
+    }
+
+    onCuePositionChanged(cb, context) {
+        this.events.on('cue-position-changed', cb, context)
     }
 
     //cb: (playerIndex: number) => void, context?: any
