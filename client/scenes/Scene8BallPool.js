@@ -93,7 +93,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
             radius: 22.5,
         });
         ball.setBounce(1);
-        ball.setFriction(0.7, 0.01);
+        ball.setFriction(0, 0.02, 0.5);
         if (key === 'ball_16') {
             // ball.setVelocity(50, 0);
             // ball.setAngularVelocity(0)
@@ -276,15 +276,16 @@ export default class Scene_8BallPool extends Phaser.Scene {
                             this.input.on('pointerDown', this.startDrag, this)
                         }
                         this.cushionTouchedAfterHittingBall = true
+
                         if (ball.texture.key === 'ball_8') {
                             //todo: what if 8 ball is potted before grps are decided? (foul)
                             if (playerGroup !== 'undefined') {
                                 if (playerGroup.length) {
-                                    console.log(`Player ${this.currentPlayer} wins`)
-                                    console.log(`Player ${3 - this.currentPlayer} loses`)
-                                } else {
-                                    console.log(`Player ${3 - this.currentPlayer} wins`)
+                                    console.log(`Player ${this.currentPlayer ^ 3} wins`)
                                     console.log(`Player ${this.currentPlayer} loses`)
+                                } else {
+                                    console.log(`Player ${this.currentPlayer} wins`)
+                                    console.log(`Player ${this.currentPlayer ^ 3} loses`)
                                 }
                                 this.gameOver()
                             } else {
@@ -377,7 +378,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
                     cushionCollision.play()
                 } else if (bodyA.collisionFilter.category === cueMask || bodyB.collisionFilter.category === cueMask) {
                     cueCollisionStrong.play()
-                    this.cue.se
                 } else {
                     /*todo: wrong suit ball first touched (done)
                             8 ball touched first (done)
@@ -386,15 +386,17 @@ export default class Scene_8BallPool extends Phaser.Scene {
 
                     if (bodyA.collisionFilter.category === this.cueBall.body.collisionFilter.category) {
                         if (this.noBallTouched) {
-                            if (playerGroup === 'undefined') this.correctCategoryBallHit = true
-                            else {
+                            if (playerGroup === 'undefined') {
+                                if (bodyB.gameObject.texture.key !== "ball_8") this.correctCategoryBallHit = true
+                            } else {
                                 this.correctCategoryBallHit = (playerGroup === "this.solids" && this.solids.includes(bodyB.gameObject)) || (playerGroup === "this.stripes" && this.stripes.includes(bodyB.gameObject));
                             }
                         }
                     } else if (bodyB.collisionFilter.category === this.cueBall.body.collisionFilter.category) {
                         if (this.noBallTouched) {
-                            if (playerGroup === 'undefined') this.correctCategoryBallHit = true
-                            else {
+                            if (playerGroup === 'undefined') {
+                                if (bodyA.gameObject.texture.key !== "ball_8") this.correctCategoryBallHit = true
+                            } else {
                                 this.correctCategoryBallHit = (playerGroup === "this.solids" && this.solids.includes(bodyA.gameObject)) || (playerGroup === "this.stripes" && this.stripes.includes(bodyA.gameObject));
                             }
                         }
@@ -434,7 +436,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.board.displayWidth = this.sys.canvas.width
         this.board.displayHeight = this.sys.canvas.height
         this.gameOverSound.play()
-        console.log("Game over, player wins")
     }
 
     startDrag(pointer, targets) {
