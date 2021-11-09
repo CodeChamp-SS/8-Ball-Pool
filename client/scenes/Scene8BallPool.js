@@ -132,7 +132,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
         })
         cushion.setRotation(angle)
         cushion.setVisible(false)
-        cushion.setBounce(0.8)
         cushion.setBounce(0.9)
         cushion.setStatic(true)
         cushion.setFrictionStatic(0.1)
@@ -271,7 +270,11 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         console.log(bodyB.gameObject)
                         bodyB.gameObject.destroy()
                         pocket.play()
-
+                        let index = this.balls.indexOf(ball);
+                        if (index !== -1) {
+                            this.balls.splice(index, 1);
+                            this.input.on('pointerDown', this.startDrag, this)
+                        }
                         this.cushionTouchedAfterHittingBall = true
                         if (ball.texture.key === 'ball_8') {
                             //todo: what if 8 ball is potted before grps are decided? (foul)
@@ -290,16 +293,11 @@ export default class Scene_8BallPool extends Phaser.Scene {
                                 this.foulMade()
                             }
                         } else {
-                            let index = this.balls.indexOf(ball);
                             let solidsIndex = this.solids.indexOf(ball);
                             let stripesIndex = this.stripes.indexOf(ball);
                             console.log(solidsIndex)
                             console.log(stripesIndex)
 
-                            if (index !== -1) {
-                                this.balls.splice(index, 1);
-                                this.input.on('pointerDown', this.startDrag, this)
-                            }
                             if (solidsIndex !== -1) {
                                 if (playerGroup === 'undefined') playerGroup = 'this.solids'
                                 if (playerGroup === 'this.solids') {
@@ -324,8 +322,12 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         console.log(bodyA.gameObject)
                         bodyA.gameObject.destroy()
                         pocket.play()
+                        let index = this.balls.indexOf(ball);
+                        if (index !== -1) {
+                            this.balls.splice(index, 1);
+                            this.input.on('pointerDown', this.startDrag, this)
+                        }
                         this.cushionTouchedAfterHittingBall = true
-
                         if (ball.texture.key === 'ball_8') {
                             if (playerGroup !== 'undefined') {
                                 if (playerGroup.length) {
@@ -341,14 +343,9 @@ export default class Scene_8BallPool extends Phaser.Scene {
                                 this.foulMade()
                             }
                         } else {
-                            let index = this.balls.indexOf(ball);
                             let solidsIndex = this.solids.indexOf(ball);
                             let stripesIndex = this.stripes.indexOf(ball);
 
-                            if (index !== -1) {
-                                this.balls.splice(index, 1);
-                                this.input.on('pointerDown', this.startDrag, this)
-                            }
                             if (solidsIndex !== -1) {
                                 if (playerGroup === 'undefined') playerGroup = 'this.solids'
                                 if (playerGroup === 'this.solids') {
