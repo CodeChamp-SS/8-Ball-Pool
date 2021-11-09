@@ -20,7 +20,7 @@ export class Ball8PoolRoom extends Room<Ball8PoolState> {
             //dispatch the command to update state value
             this.dispatcher.dispatch(new PlayerSelectionCommand(), {
                 client,
-                psdata: message.data
+                psData: message.data
             })
         })
         this.onMessage("2", (client, message) => {

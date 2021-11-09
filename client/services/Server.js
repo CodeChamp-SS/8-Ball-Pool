@@ -7,7 +7,7 @@ export default class Server {
         this.client = new Colyseus.Client('ws://localhost:2567')
         this.events = new Phaser.Events.EventEmitter()
     }
-    
+
     get playerIndex() {
         return this._playerIndex
     }
@@ -19,7 +19,7 @@ export default class Server {
         return this.room?.state.gameState
     }
 
-    isCurrentPlayerTurn(){
+    isCurrentPlayerTurn() {
         if (!this.room) {
             return true
         }
@@ -28,7 +28,7 @@ export default class Server {
 
     async join() {
         this.room = await this.client.joinOrCreate('ball-8-pool')
-        
+
         //message: { playerIndex: number }
         this.room.onMessage(Message.PlayerIndex, (message) => {
             console.log(message.playerIndex)
@@ -41,13 +41,13 @@ export default class Server {
 
         this.room.state.onChange = (changes) => {
             changes.forEach(change => {
-                console.log(change)
+                // console.log(change)
                 const {field, value} = change
 
                 switch (field) {
-                    case 'balls':
-                    	this.events.emit('board-changed', value)
-                    	break
+                    case 'hit':
+                        this.events.emit('board-changed', value)
+                        break
 
                     case 'activePlayer':
                         this.events.emit('player-turn-changed', value)
@@ -73,7 +73,7 @@ export default class Server {
         this.room?.leave()
         this.events.removeAllListeners()
     }
-    
+
     setStateData(data) {
         if (!this.room) {
             return
@@ -110,24 +110,28 @@ export default class Server {
         //send data to the server via messages
         this.room.send(Message.PlayerTurnData, {data})
     }
-    
+
     //state: IBall8PoolState
     //cb: (state) => void, context?: any
-    onceStateChanged(cb, context){
+    onceStateChanged(cb, context) {
         this.events.once('once-state-changed', cb, context)
     }
-    //cb: (cell: number, index: number) => void, context?: any    
+
+    //cb: (cell: number, index: number) => void, context?: any
     onBoardChanged(cb, context) {
         this.events.on('board-changed', cb, context)
     }
+
     //cb: (playerIndex: number) => void, context?: any
     onPlayerTurnChanged(cb, context) {
         this.events.on('player-turn-changed', cb, context)
     }
+
     //cb: (playerIndex: number) => void, context?: any
     onPlayerWon(cb, context) {
         this.events.on('player-win', cb, context)
     }
+
     //cb: (state: GameState) => void, context?: any
     onGameStateChanged(cb, context) {
         this.events.on('game-state-changed', cb, context)

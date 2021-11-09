@@ -115,8 +115,8 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
     }
 
     createBalls() {
-        for(let i=0; i<16; i++) {
-            this.createBall(ballCords[i][0], ballCords[i][1], `ball_${i+1}`)
+        for (let i = 0; i < 16; i++) {
+            this.createBall(ballCords[i][0], ballCords[i][1], `ball_${i + 1}`)
         }
         // this.createBall(950, 350, 'ball_1')
         // this.createBall(1000, 320, 'ball_2')
@@ -179,7 +179,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         if (!this.server) {
             throw new Error('server instance missing')
         }
-        
+
         await this.server.join()
 
         this.server.onceStateChanged(this.createBoard, this)
@@ -189,7 +189,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
     //1/ if(this.server !== null) this.server.setStateData()  
     //2/ if(this.server !== null) this.server.onBoardChanged(this.handleBoardChanged, this)
 
-    createBoard(state){
+    createBoard(state) {
         console.log(state)
         let board = this.add.image(0, 0, 'board');
         board.setOrigin(0, 0)
@@ -344,16 +344,15 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         this.hit = false
         this.moveLine = true
 
-        if (this.server !==null && this.server.gameState === GameState.WaitingForPlayers)
-		{
-			const width = this.scale.width
-			this.gameStateText = this.add.text(width * 0.5, 50, 'Waiting for opponent...')
-				.setOrigin(0.5)
-		}
-        if(this.server !== null) this.server.onBoardChanged(this.handleBoardChanged, this)
-		if(this.server !== null) this.server.onPlayerTurnChanged(this.handlePlayerTurnChanged, this)
-		//this.server?.onPlayerWon(this.handlePlayerWon, this)
-		//this.server?.onGameStateChanged(this.handleGameStateChanged, this)
+        if (this.server !== null && this.server.gameState === GameState.WaitingForPlayers) {
+            const width = this.scale.width
+            this.gameStateText = this.add.text(width * 0.5, 50, 'Waiting for opponent...')
+                .setOrigin(0.5)
+        }
+        if (this.server !== null) this.server.onBoardChanged(this.handleBoardChanged, this)
+        if (this.server !== null) this.server.onPlayerTurnChanged(this.handlePlayerTurnChanged, this)
+        //this.server?.onPlayerWon(this.handlePlayerWon, this)
+        //this.server?.onGameStateChanged(this.handleGameStateChanged, this)
     }
 
     foulMade() {
@@ -397,12 +396,12 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         return 50 / Math.pow(3, x) + 25
     }
 
-    
+
     async update() {
-        console.log(this.server.isCurrentPlayerTurn())
-        if(this.server ===  null || !this.server.isCurrentPlayerTurn()){
+        if (this.server === null || !this.server.isCurrentPlayerTurn()) {
             return
         }
+        console.log("this player's turn")
 
         let ballPosition = this.cueBall.body.position
         let moveCue = false
@@ -410,35 +409,23 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         let pointer = this.input.activePointer;
         this.circles = []
 
-        let ballsState = {
-           balls : [],
-           potted : []
-        } 
-
         this.balls.forEach(ball => {
             if (Math.abs(ball.body.velocity.x) > 1e-2 || Math.abs(ball.body.velocity.y) > 1e-2) {
                 moveCue = true
             }
-            let bp = {
-                x: ball.body.position.x,
-                y: ball.body.position.y,
-                isPotted : false
-            }
-
-            ballsState.balls.push(bp)
         })
-
-        Object.keys(this.potted).forEach((key) => {
-            if (this.potted[key]) {
-                ballsState.potted.push(parseInt(key[5]))
-            }
-        })
-
-        if(this.server !== null) this.server.setStateData(ballsState)
 
         let cuePosition = this.cue.body.position
         let velocityVector = new Phaser.Math.Vector2(ballPosition.x - cuePosition.x, ballPosition.y - cuePosition.y)
         let angle = velocityVector.angle() + Math.PI / 2
+
+        let newData = {
+            hitSpeed: 0,
+            cueAngle: 0,
+            delAngle: angle,
+            duration: 0
+        }
+
         if (moveCue) {
             this.moveLine = true
             if (this.noBallTouchedRest) {
@@ -499,6 +486,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
                 })
                 this.graphics.strokeLineShape(this.line)
             }
+            newData.cueAngle -= Math.PI / 360
             this.matter.body.rotate(this.cue.body, -Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
         } else if (this.cursors.right.isDown) {
             if (!moveCue) {
@@ -508,6 +496,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
                 })
                 this.graphics.strokeLineShape(this.line)
             }
+            newData.cueAngle += Math.PI / 360
             this.matter.body.rotate(this.cue.body, Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
         }
 
@@ -542,7 +531,6 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
             this.graphics.strokeLineShape(this.line)
             this.graphics.strokeLineShape(centreLine)
             this.graphics.strokeCircle(this.guideCircle.x, this.guideCircle.y, this.guideCircle.radius)
-
         }
 
         if (this.cursors.down.isDown) {
@@ -553,6 +541,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
                 v1.subtract(new Phaser.Math.Vector2(this.cueBall.body.position))
                 let velocityV = v1.normalize().scale(3)
                 this.cue.setVelocity(velocityV.x, velocityV.y)
+                // console.log("velocity set")
             }
         }
         // console.log(this.hit)
@@ -560,40 +549,77 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
             this.hit = false
             let duration = this.cursors.down.duration
             duration = Math.min(duration, 2000)
+            newData.duration = duration
             if (!moveCue) {
                 let speed = ((duration + this.f(duration)) * 1.25) / 600
                 speed = Math.min(speed, 4.5)
                 console.log("speed = ", speed)
+                newData.hitSpeed = speed
                 // console.log(duration)
                 this.cueBall.setCollidesWith(this.cueBallCollidesWith)
                 this.cueBall.disableInteractive()
                 this.matter.applyForceFromAngle(this.cue.body, speed, angle - Math.PI / 2)
+                if (this.server !== null) this.server.setStateData(newData)
                 this.noBallTouchedRest = true
             }
         }
     }
-    
+
     //newValue: newdata
-    handleBoardChanged(newValue){
-        if(this.server ===  null || this.server.isCurrentPlayerTurn()){
+    async handleBoardChanged(newValue) {
+        if (this.server === null || this.server.isCurrentPlayerTurn()) {
             return
         }
+        console.log("not this player's turn")
         //console.log("board changed called, newValue:", newValue)
-        for (let i = 0; i < newValue.length; i++) {
-            // console.log(newValue[i].x, newValue[i].y)
-            //console.log("hello")
-            this.balls[i].body.position.x = newValue[i].x
-            this.balls[i].body.position.y = newValue[i].y
+        console.log(newValue.cueAngle, newValue.delAngle, newValue.hitSpeed, newValue.duration)
+        let ballPosition = this.cueBall.body.position
+        // for (let i = 0; i <= newValue.duration; i++) {
+        //     let v1 = new Phaser.Math.Vector2(this.cue.body.position)
+        //     v1.subtract(new Phaser.Math.Vector2(this.cueBall.body.position))
+        //     let velocityV = v1.normalize().scale(3)
+        //     this.cue.setVelocity(velocityV.x, velocityV.y)
+        // }
+        this.cue.setRotation(newValue.delAngle)
+        this.matter.body.rotate(this.cue.body, newValue.cueAngle, this.matter.vector.create(ballPosition.x, ballPosition.y))
+
+        let start = new Date().getTime();
+        while (1) {
+            let end = new Date().getTime();
+            let time = end - start;
+            if (time > newValue.duration) break;
+            console.log(time)
+            let v1 = new Phaser.Math.Vector2(this.cue.body.position)
+            v1.subtract(new Phaser.Math.Vector2(this.cueBall.body.position))
+            let velocityV = v1.normalize().scale(3)
+            // console.log("velocity set")
+            this.cue.setVelocity(velocityV.x, velocityV.y)
         }
+        this.matter.applyForceFromAngle(this.cue.body, newValue.hitSpeed, newValue.delAngle - Math.PI / 2)
+
+        // const asyncInterval = async (callback, ms, triesLeft = 5) => {
+        //     return new Promise((resolve, reject) => {
+        //         const interval = setInterval(async () => {
+        //             if (await callback()) {
+        //                 resolve();
+        //                 clearInterval(interval);
+        //             } else if (triesLeft <= 1) {
+        //                 reject();
+        //                 clearInterval(interval);
+        //             }
+        //             triesLeft--;
+        //         }, ms);
+        //     });
+        // }
+        // asyncInterval(doWork, newValue.duration).then(doNext)
     }
 
-    handlePlayerTurnChanged(playerIndex){
+    handlePlayerTurnChanged(playerIndex) {
         console.log("player turn changed to " + playerIndex)
     }
 
     //if(this.server !== null) this.server.setPlayerTurnData(true)
     //if(this.server !== null) this.server.isCurrentPlayerTurn()
-
 
 
     // private handleBoardChanged(newValue: Cell, idx: number)

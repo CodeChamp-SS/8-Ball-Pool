@@ -1,18 +1,18 @@
 import {Schema, Context, ArraySchema, type} from "@colyseus/schema";
-import {ballCords} from "../../../constants/ball8pool";
-import {IBallPosition, IBall8PoolState, GameState} from '../../../types/IBall8PoolState';
+import {IBall8PoolState, GameState, IHitParams} from '../../../types/IBall8PoolState';
 
+export class HitParams extends Schema implements IHitParams {
+    @type("number") cueAngle: number;
+    @type("number") delAngle: number;
+    @type("number") hitSpeed: number;
+    @type("number") duration: number;
 
-export class BallPosition extends Schema implements IBallPosition {
-    @type("boolean") isPotted: boolean;
-    @type("number") x: number;
-    @type("number") y: number;
-
-    constructor(x: number, y: number, isPotted = false) {
+    constructor(cueAngle = 0, delAngle = 0, hitSpeed = 0, duration = 0) {
         super();
-        this.x = x;
-        this.y = y;
-        this.isPotted = isPotted;
+        this.cueAngle = cueAngle;
+        this.delAngle = delAngle;
+        this.hitSpeed = hitSpeed;
+        this.duration = duration;
     }
 }
 
@@ -21,16 +21,16 @@ export class Ball8PoolState extends Schema implements IBall8PoolState {
     @type('number')
     gameState = GameState.WaitingForPlayers
 
-    @type([BallPosition])
-    balls: ArraySchema<BallPosition>
+    @type(HitParams)
+    hit: HitParams
 
     @type(['number'])
     ballsPotted: ArraySchema<number>
 
-    @type(['boolean'])
+    @type('boolean')
     isWhitePotted: boolean
 
-    @type(['boolean'])
+    @type('boolean')
     isBlackPotted: boolean
 
     @type('number')
@@ -42,17 +42,9 @@ export class Ball8PoolState extends Schema implements IBall8PoolState {
     constructor() {
         super()
         //initial state values
-        this.balls = new ArraySchema<BallPosition>()
-        ballCords.forEach((ball) => {
-            // const ballPosition: IBallPosition = {
-            //     isPotted: false,
-            //     x: ball[0],
-            //     y: ball[1]
-            // }
-            this.balls.push(new BallPosition(ball[0], ball[1]))
-        })
         this.ballsPotted = new ArraySchema()
         this.isWhitePotted = false
         this.isBlackPotted = false
+        this.hit = new HitParams()
     }
 }

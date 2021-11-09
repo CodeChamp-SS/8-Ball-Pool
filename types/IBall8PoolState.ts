@@ -1,21 +1,22 @@
 import {Schema, ArraySchema} from '@colyseus/schema'
 
-export interface IBallPosition {
-    isPotted?: boolean
-    x: number,
-    y: number
-}
-
 export enum GameState {
     WaitingForPlayers,
     Playing,
     Finished
 }
 
+export interface IHitParams {
+    cueAngle: number,
+    delAngle: number,
+    hitSpeed: number,
+    duration : number
+}
+
 export interface IBall8PoolState extends Schema {
     gameState: GameState
 
-    balls: any
+    hit: any
 
     ballsPotted: ArraySchema<number>
 
