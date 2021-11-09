@@ -343,6 +343,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         this.graphics.alpha = 0.4
         this.hit = false
         this.moveLine = true
+        this.it = 0
 
         if (this.server !== null && this.server.gameState === GameState.WaitingForPlayers) {
             const width = this.scale.width
@@ -423,7 +424,9 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
             hitSpeed: 0,
             cueAngle: 0,
             delAngle: angle,
-            duration: 0
+            duration: 0,
+            x: 0,
+            y: 0
         }
 
         if (moveCue) {
@@ -450,6 +453,9 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
                 this.matter.body.setPosition(this.cue.body, this.matter.vector.create(this.cueBall.body.position.x - 410, this.cueBall.body.position.y))
                 this.cueBall.setVisible(true).setAwake()
             }
+            // newData.x = this.cue.body.position.x
+            // newData.y = this.cue.body.position.y
+            // if (this.server !== null) this.server.setStateData(newData)
 
             this.balls.forEach(ball => {
                 if (ball.body.position !== ballPosition) {
@@ -541,9 +547,12 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
                 v1.subtract(new Phaser.Math.Vector2(this.cueBall.body.position))
                 let velocityV = v1.normalize().scale(3)
                 this.cue.setVelocity(velocityV.x, velocityV.y)
+                console.log(this.cue.body.position)
+                this.it += 1
                 // console.log("velocity set")
             }
         }
+        if(this.it > 0) console.log(this.it)
         // console.log(this.hit)
         if (this.cursors.down.isUp && this.hit) {
             this.hit = false
@@ -558,9 +567,13 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
                 // console.log(duration)
                 this.cueBall.setCollidesWith(this.cueBallCollidesWith)
                 this.cueBall.disableInteractive()
+                newData.x = this.cue.body.position.x
+                newData.y = this.cue.body.position.y
+                this.cue.setVelocity(0, 0)
                 this.matter.applyForceFromAngle(this.cue.body, speed, angle - Math.PI / 2)
                 if (this.server !== null) this.server.setStateData(newData)
                 this.noBallTouchedRest = true
+                this.it = 0
             }
         }
     }
@@ -574,44 +587,44 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         //console.log("board changed called, newValue:", newValue)
         console.log(newValue.cueAngle, newValue.delAngle, newValue.hitSpeed, newValue.duration)
         let ballPosition = this.cueBall.body.position
-        // for (let i = 0; i <= newValue.duration; i++) {
-        //     let v1 = new Phaser.Math.Vector2(this.cue.body.position)
-        //     v1.subtract(new Phaser.Math.Vector2(this.cueBall.body.position))
-        //     let velocityV = v1.normalize().scale(3)
-        //     this.cue.setVelocity(velocityV.x, velocityV.y)
-        // }
+
         this.cue.setRotation(newValue.delAngle)
         this.matter.body.rotate(this.cue.body, newValue.cueAngle, this.matter.vector.create(ballPosition.x, ballPosition.y))
 
-        let start = new Date().getTime();
-        while (1) {
-            let end = new Date().getTime();
-            let time = end - start;
-            if (time > newValue.duration) break;
-            console.log(time)
-            let v1 = new Phaser.Math.Vector2(this.cue.body.position)
-            v1.subtract(new Phaser.Math.Vector2(this.cueBall.body.position))
-            let velocityV = v1.normalize().scale(3)
-            // console.log("velocity set")
-            this.cue.setVelocity(velocityV.x, velocityV.y)
-        }
-        this.matter.applyForceFromAngle(this.cue.body, newValue.hitSpeed, newValue.delAngle - Math.PI / 2)
-
-        // const asyncInterval = async (callback, ms, triesLeft = 5) => {
-        //     return new Promise((resolve, reject) => {
-        //         const interval = setInterval(async () => {
-        //             if (await callback()) {
-        //                 resolve();
-        //                 clearInterval(interval);
-        //             } else if (triesLeft <= 1) {
-        //                 reject();
-        //                 clearInterval(interval);
-        //             }
-        //             triesLeft--;
-        //         }, ms);
-        //     });
+        // let start = performance.now()
+        // while (1) {
+        //     let end = performance.now();
+        //     let time = end - start;
+        //     if (time > newValue.duration) break;
+        //     console.log(time)
+        //     let v1 = new Phaser.Math.Vector2(this.cue.body.position)
+        //     v1.subtract(new Phaser.Math.Vector2(this.cueBall.body.position))
+        //     let velocityV = v1.normalize().scale(3)
+        //     // console.log("velocity set")
+        //     this.cue.setVelocity(velocityV.x, velocityV.y)
+        //     console.log(this.cue.body.position)
+        //     this.cue.setPosition(-240, 350)
         // }
-        // asyncInterval(doWork, newValue.duration).then(doNext)
+
+        var start = performance.now();
+        let context = this
+        this.matter.body.setPosition(this.cue.body, this.matter.vector.create(newValue.x, newValue.y))
+        context.matter.applyForceFromAngle(context.cue.body, newValue.hitSpeed, newValue.delAngle - Math.PI / 2)
+
+        // let it = 0
+        // var timer_id = setInterval(function () {
+        //     if (performance.now() - start > newValue.duration) {
+        //         console.log(it)
+        //         clearInterval(timer_id);
+        //     } else {
+        //         let v1 = new Phaser.Math.Vector2(context.cue.body.position)
+        //         v1.subtract(new Phaser.Math.Vector2(context.cueBall.body.position))
+        //         let velocityV = v1.normalize().scale(3)
+        //         // console.log("velocity set")
+        //         context.cue.setVelocity(velocityV.x, velocityV.y)
+        //         ++it
+        //     }
+        // }, 1);
     }
 
     handlePlayerTurnChanged(playerIndex) {

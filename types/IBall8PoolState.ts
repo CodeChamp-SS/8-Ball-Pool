@@ -10,7 +10,9 @@ export interface IHitParams {
     cueAngle: number,
     delAngle: number,
     hitSpeed: number,
-    duration : number
+    duration : number,
+    x: number,
+    y: number
 }
 
 export interface IBall8PoolState extends Schema {

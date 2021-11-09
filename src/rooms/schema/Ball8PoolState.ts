@@ -6,16 +6,19 @@ export class HitParams extends Schema implements IHitParams {
     @type("number") delAngle: number;
     @type("number") hitSpeed: number;
     @type("number") duration: number;
+    @type("number") x: number;
+    @type("number") y: number;
 
-    constructor(cueAngle = 0, delAngle = 0, hitSpeed = 0, duration = 0) {
+    constructor(cueAngle = 0, delAngle = 0, hitSpeed = 0, duration = 0, x = 0, y = 0) {
         super();
         this.cueAngle = cueAngle;
         this.delAngle = delAngle;
         this.hitSpeed = hitSpeed;
         this.duration = duration;
+        this.x = x
+        this.y = y
     }
 }
-
 
 export class Ball8PoolState extends Schema implements IBall8PoolState {
     @type('number')

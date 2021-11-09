@@ -25,7 +25,7 @@ export default class PlayerSelectionCommand extends Command<IBall8PoolState, Pay
         //set state values here on the basis of psdata
 
         console.log(psData.cueAngle, psData.delAngle, psData.hitSpeed, psData.duration)
-        this.room.state.hit = new HitParams(psData.cueAngle, psData.delAngle, psData.hitSpeed, psData.duration)
+        this.room.state.hit = new HitParams(psData.cueAngle, psData.delAngle, psData.hitSpeed, psData.duration, psData.x, psData.y)
 
         // return [
         // 	new CheckWinnerCommand()
