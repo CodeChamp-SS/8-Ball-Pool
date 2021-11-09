@@ -503,7 +503,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
             }
             newData.cueAngle -= Math.PI / 360
             this.matter.body.rotate(this.cue.body, -Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
-            if (this.server !== null) this.server.setCueStateData([-Math.PI / 360, -Math.PI / 360, -Math.PI / 360])
+            if (this.server !== null) this.server.setCueStateData([-Math.PI / 360, ballPosition.x, ballPosition.y])
         } else if (this.cursors.right.isDown) {
             if (!moveCue) {
                 this.graphics.clear()
@@ -514,7 +514,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
             }
             newData.cueAngle += Math.PI / 360
             this.matter.body.rotate(this.cue.body, Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
-            if (this.server !== null) this.server.setCueStateData([Math.PI / 360, Math.PI / 360, Math.PI / 360])
+            if (this.server !== null) this.server.setCueStateData([Math.PI / 360, ballPosition.x, ballPosition.y])
         }
 
         let minDist = 1e9
@@ -596,9 +596,9 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         //console.log("board changed called, newValue:", newValue)
         console.log(newValue.cueAngle, newValue.delAngle, newValue.hitSpeed, newValue.duration)
         let ballPosition = this.cueBall.body.position
-        this.cue.setVisible(true)
-        this.cue.setRotation(newValue.delAngle)
-        this.matter.body.rotate(this.cue.body, newValue.cueAngle, this.matter.vector.create(ballPosition.x, ballPosition.y))
+        // this.cue.setVisible(true)
+        // this.cue.setRotation(newValue.delAngle)
+        // this.matter.body.rotate(this.cue.body, newValue.cueAngle, this.matter.vector.create(ballPosition.x, ballPosition.y))
 
         let context = this
         context.matter.body.setPosition(context.cue.body, context.matter.vector.create(newValue.x, newValue.y))
@@ -646,8 +646,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         if (newValue.length === 1) {
             this.cue.setRotation(newValue[0])
         } else if (newValue.length === 3) {
-            let ballPosition = this.cueBall.body.position
-            this.matter.body.rotate(this.cue.body, newValue[0], this.matter.vector.create(ballPosition.x, ballPosition.y))
+            this.matter.body.rotate(this.cue.body, newValue[0], this.matter.vector.create(newValue[1], newValue[2]))
         } else {
             console.log(newValue[0], newValue[1])
             this.matter.body.setPosition(this.cue.body, this.matter.vector.create(newValue[0], newValue[1]))
