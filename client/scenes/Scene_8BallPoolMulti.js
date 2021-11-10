@@ -243,17 +243,20 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         let pot6 = this.createPot(70, 710)
         let potCategory = pot1.body.collisionFilter.category
 
+        this.composite = this.matter.composite.create()
         this.cue = this.matter.add.sprite(250, 370, 'cue')
         this.cue.setBody({
             type: 'trapezoid',
             slope: 0.5
         })
         this.cue.setBounce(1)
-        this.cue.setMass(10)
+        // this.cue.setMass(10)
         this.cue.setFrictionAir(0.5)
         this.cue.setRotation(Math.PI / 2)
         this.cue.setCollisionCategory(this.cueCategory)
         this.cue.setCollidesWith([this.cueBallCategory])
+        this.cue.setFixedRotation()
+        this.matter.composite.add(this.composite, this.cue.body)
         let cueMask = this.cue.body.collisionFilter.category
 
         let categories = [this.ballCategory, this.cueBallCategory, this.cushionCategory, this.potCategory]
@@ -344,6 +347,8 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         this.hit = false
         this.moveLine = true
         this.cuePositionReset = false
+        this.cnt = 0
+        this.prv = 0
 
         if (this.server !== null && this.server.gameState === GameState.WaitingForPlayers) {
             const width = this.scale.width
@@ -403,7 +408,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         if (this.server === null || !this.server.isCurrentPlayerTurn()) {
             return
         }
-        console.log("this player's turn")
+        // console.log("this player's turn")
 
         let ballPosition = this.cueBall.body.position
         let moveCue = false
@@ -439,10 +444,11 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
             }
             this.graphics.clear()
             this.cue.setVisible(false)
-            this.cue.setToSleep()
+            this.cue.setCollidesWith([])
             this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
+            this.cuePositionReset = true
             if (this.server !== null) {
-                this.server.setCueStateData([this.cue.body.position.x, this.cue.body.position.y])
+                this.server.setCueStateData([ballPosition.x, ballPosition.y])
                 // this.cuePositionReset = false
             }
         } else {
@@ -451,7 +457,7 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
                 this.noBallTouched = false
                 this.cushionTouchedAfterHittingBall = true
             }
-            this.cue.setAwake()
+            this.cue.setCollidesWith([this.cueBallCategory])
             if (!this.cueBall.visible) {
                 this.cueBall.setPosition(342, 350)
                 ballPosition = this.cueBall.body.position
@@ -486,9 +492,9 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
             }
             this.cue.setVisible(true)
             this.cue.setRotation(angle)
-            if (this.server !== null) {
-                this.server.setCueStateData([angle])
-                // this.cuePositionReset = false
+            if (this.server !== null && this.cuePositionReset) {
+                this.server.setCueStateData([angle, this.cue.body.position.x, this.cue.body.position.y])
+                this.cuePositionReset = false
             }
             //if(this.server !== null) this.server.setPlayerTurnData(true)
 
@@ -502,8 +508,13 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
                 this.graphics.strokeLineShape(this.line)
             }
             newData.cueAngle -= Math.PI / 360
-            this.matter.body.rotate(this.cue.body, -Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
-            if (this.server !== null) this.server.setCueStateData([-Math.PI / 360, ballPosition.x, ballPosition.y])
+            this.matter.composite.rotate(this.composite, -Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
+            // this.matter.body.rotate(this.cue.body, -Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
+            if (this.server !== null) {
+                console.log("left pressed")
+                this.cnt += 1
+                this.server.setCueStateData([-1, ballPosition.x, ballPosition.y, this.cnt])
+            }
         } else if (this.cursors.right.isDown) {
             if (!moveCue) {
                 this.graphics.clear()
@@ -513,8 +524,12 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
                 this.graphics.strokeLineShape(this.line)
             }
             newData.cueAngle += Math.PI / 360
-            this.matter.body.rotate(this.cue.body, Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
-            if (this.server !== null) this.server.setCueStateData([Math.PI / 360, ballPosition.x, ballPosition.y])
+            this.matter.composite.rotate(this.composite, Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
+            // this.matter.body.rotate(this.cue.body, Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
+            if (this.server !== null) {
+                this.cnt += 1
+                this.server.setCueStateData([1, ballPosition.x, ballPosition.y, this.cnt])
+            }
         }
 
         let minDist = 1e9
@@ -579,10 +594,10 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
                 newData.x = this.cue.body.position.x
                 newData.y = this.cue.body.position.y
                 this.cue.setVelocity(0, 0)
+                console.log(this.cue.body.position, this.cue.angle)
                 this.matter.applyForceFromAngle(this.cue.body, speed, angle - Math.PI / 2)
                 if (this.server !== null) this.server.setStateData(newData)
                 this.noBallTouchedRest = true
-                this.cuePositionReset = true
             }
         }
     }
@@ -592,17 +607,21 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         if (this.server === null || this.server.isCurrentPlayerTurn()) {
             return
         }
-        console.log("not this player's turn")
+        // console.log("not this player's turn")
         //console.log("board changed called, newValue:", newValue)
         console.log(newValue.cueAngle, newValue.delAngle, newValue.hitSpeed, newValue.duration)
-        let ballPosition = this.cueBall.body.position
         // this.cue.setVisible(true)
         // this.cue.setRotation(newValue.delAngle)
         // this.matter.body.rotate(this.cue.body, newValue.cueAngle, this.matter.vector.create(ballPosition.x, ballPosition.y))
-
         let context = this
-        context.matter.body.setPosition(context.cue.body, context.matter.vector.create(newValue.x, newValue.y))
-        context.matter.applyForceFromAngle(context.cue.body, newValue.hitSpeed, newValue.delAngle - Math.PI / 2)
+
+        let ballPosition = this.cueBall.body.position
+        let cuePosition = this.cue.body.position
+        this.cue.setCollidesWith([this.cueBallCategory])
+        this.matter.body.setPosition(this.cue.body, this.matter.vector.create(newValue.x, newValue.y))
+        console.log(this.cue.body.position, this.cue.angle)
+        let velocityVector = new Phaser.Math.Vector2(ballPosition.x - cuePosition.x, ballPosition.y - cuePosition.y)
+        this.matter.applyForceFromAngle(this.cue.body, newValue.hitSpeed, velocityVector.angle())
 
         // let start = performance.now()
         // while (1) {
@@ -643,13 +662,25 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
             return
         }
         // this.cue.setVisible(false)
-        if (newValue.length === 1) {
+        if (newValue.length === 3) {
             this.cue.setRotation(newValue[0])
-        } else if (newValue.length === 3) {
-            this.matter.body.rotate(this.cue.body, newValue[0], this.matter.vector.create(newValue[1], newValue[2]))
+            this.matter.body.setPosition(this.cue.body, this.matter.vector.create(newValue[1], newValue[2]))
+        } else if (newValue.length === 4) {
+            // console.log(this.matter.composite.allBodies(this.composite))
+            this.graphics.fillPoint(newValue[1], newValue[2], 10)
+            console.log("left pressed")
+            ++this.prv
+            this.matter.composite.rotate(this.composite, newValue[0] * Math.PI / 360, this.matter.vector.create(newValue[1], newValue[2]))
+            while (this.prv < newValue[3]) {
+                console.log("left pressed")
+                ++this.prv
+                this.matter.composite.rotate(this.composite, newValue[0] * Math.PI / 360, this.matter.vector.create(newValue[1], newValue[2]))
+            }
+            // console.log(newValue[1], newValue[2])
+            // this.matter.body.rotate(this.cue.body, newValue[0], this.matter.vector.create(newValue[1], newValue[2]))
         } else {
-            console.log(newValue[0], newValue[1])
-            this.matter.body.setPosition(this.cue.body, this.matter.vector.create(newValue[0], newValue[1]))
+            // console.log(newValue[0], newValue[1])
+            this.cue.setCollidesWith([])
         }
     }
 
