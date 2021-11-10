@@ -157,6 +157,39 @@ export default class Scene_8BallPool extends Phaser.Scene {
         return pot
     }
 
+    createRacks(){
+        this.solidsRack = {}
+        this.stripesRack = {}
+        this.add.rectangle(480,38 , 420, 50, 0x000000, 0.7)
+        this.add.rectangle(1160, 38, 420, 50, 0x000000, 0.7)
+        for (let i = 0; i < 15; i++){
+            if (i < 7){
+                let solidBall = this.matter.add.sprite(300 + 60 * i, 40, `ball_${i + 1}`)
+                solidBall.displayHeight = 40
+                solidBall.displayWidth = 40
+                solidBall.setBody({
+                    type: 'circle',
+                    radius: 20
+                })
+                solidBall.setStatic(true)
+                this.solidsRack[this.balls[i].texture.key] = solidBall
+            }
+            if (i > 7){
+                let stripeBall = this.matter.add.sprite(500 + 60 * i, 40, `ball_${i + 1}`)
+                stripeBall.displayHeight = 40
+                stripeBall.displayWidth = 40
+                stripeBall.setBody({
+                    type: 'circle',
+                    radius: 20
+                })
+                stripeBall.setStatic(true)
+                this.stripesRack[this.balls[i].texture.key] = stripeBall
+            }
+        }
+        console.log('solids rack: ', this.solidsRack)
+        console.log('stripes rack: ', this.stripesRack)
+    }
+
     create() {
         let board = this.add.image(0, 0, 'board');
         board.setOrigin(0, 0)
@@ -169,8 +202,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.cushionCategory = this.matter.world.nextCategory();
         this.potCategory = this.matter.world.nextCategory()
 
-        // x: 95 y: 90
-        // width: 1355 height: 600
         let boundary = this.matter.world.setBounds(35, 25, 1375, 730, 1)
         boundary.disableGravity();
 
@@ -193,6 +224,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.stripes = []
         this.replace8Ball = false
         this.createBalls()
+        this.createRacks()
         for (let i = 0; i < 15; i++) {
             if (i < 7) this.solids.push(this.balls[i])
             if (i > 7) this.stripes.push(this.balls[i])
@@ -210,7 +242,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
             slope: 0.5
         })
         this.cue.setBounce(1)
-        // this.cue.setMass(10)
         this.cue.setFrictionAir(0.5)
         this.cue.setRotation(Math.PI / 2)
         this.cue.setCollisionCategory(this.cueCategory)
@@ -255,14 +286,15 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.numSolids = this.solids.length
         this.numStripes = this.stripes.length
 
+        const style = {font: '18px'}
+        this.turn = this.add.text(700, 0, "PLAYER 1's turn", style)
+
         this.matter.world.on("collisionstart", (event) => {
             event.pairs.forEach((pair) => {
                 const {bodyA, bodyB} = pair;
                 // console.log(bodyA.collisionFilter.category)
                 // console.log(bodyB.collisionFilter.category)
-
-                let playerGroup = `${this.playerBalls[this.currentPlayer]}`     //because currentPlayer changes as soon as cueBall is struck
-                console.log(playerGroup)
+                let playerGroup = `${this.playerBalls[this.currentPlayer]}`
                 console.log(playerGroup)
                 if (bodyA.collisionFilter.category === potCategory) {
                     if (bodyB.collisionFilter.category !== this.cueBall.body.collisionFilter.category) {
@@ -278,9 +310,8 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         this.cushionTouchedAfterHittingBall = true
 
                         if (ball.texture.key === 'ball_8') {
-                            //todo: what if 8 ball is potted before grps are decided? (foul)
                             if (playerGroup !== 'undefined') {
-                                if (playerGroup.length) {
+                                if (this.playerBalls[playerGroup].length) {
                                     console.log(`Player ${this.currentPlayer ^ 3} wins`)
                                     console.log(`Player ${this.currentPlayer} loses`)
                                 } else {
@@ -289,17 +320,18 @@ export default class Scene_8BallPool extends Phaser.Scene {
                                 }
                                 this.gameOver()
                             } else {
-                                //todo: reset 8 ball
                                 this.replace8Ball = true
                                 this.foulMade()
                             }
                         } else {
                             let solidsIndex = this.solids.indexOf(ball);
                             let stripesIndex = this.stripes.indexOf(ball);
-                            console.log(solidsIndex)
-                            console.log(stripesIndex)
+                            console.log('solids idx: ', solidsIndex)
+                            console.log('stripes idx: ', stripesIndex)
 
                             if (solidsIndex !== -1) {
+                                this.solidsRack[ball.texture.key].destroy()
+                                delete this.solidsRack[ball.texture.key]
                                 if (playerGroup === 'undefined') playerGroup = 'this.solids'
                                 if (playerGroup === 'this.solids') {
                                     this.solids.splice(solidsIndex, 1);
@@ -307,6 +339,8 @@ export default class Scene_8BallPool extends Phaser.Scene {
                                 }
                             }
                             if (stripesIndex !== -1) {
+                                this.stripesRack[ball.texture.key].destroy()
+                                delete this.stripesRack[ball.texture.key]
                                 if (playerGroup === 'undefined') playerGroup = 'this.stripes'
                                 if (playerGroup === 'this.stripes') {
                                     this.stripes.splice(stripesIndex, 1);
@@ -331,7 +365,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         this.cushionTouchedAfterHittingBall = true
                         if (ball.texture.key === 'ball_8') {
                             if (playerGroup !== 'undefined') {
-                                if (playerGroup.length) {
+                                if (this.playerBalls[playerGroup].length) {
                                     console.log(`Player ${this.currentPlayer ^ 3} wins`)
                                     console.log(`Player ${this.currentPlayer} loses`)
                                 } else {
@@ -348,17 +382,21 @@ export default class Scene_8BallPool extends Phaser.Scene {
                             let stripesIndex = this.stripes.indexOf(ball);
 
                             if (solidsIndex !== -1) {
+                                this.solidsRack[ball.texture.key].destroy()
+                                delete this.solidsRack[ball.texture.key]
                                 if (playerGroup === 'undefined') playerGroup = 'this.solids'
                                 if (playerGroup === 'this.solids') {
-                                    this.correctBallPotted = true
                                     this.solids.splice(solidsIndex, 1);
+                                    this.correctBallPotted = true
                                 }
                             }
                             if (stripesIndex !== -1) {
+                                this.stripesRack[ball.texture.key].destroy()
+                                delete this.stripesRack[ball.texture.key]
                                 if (playerGroup === 'undefined') playerGroup = 'this.stripes'
                                 if (playerGroup === 'this.stripes') {
-                                    this.correctBallPotted = true
                                     this.stripes.splice(stripesIndex, 1);
+                                    this.correctBallPotted = true
                                 }
                             }
                         }
@@ -379,9 +417,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 } else if (bodyA.collisionFilter.category === cueMask || bodyB.collisionFilter.category === cueMask) {
                     cueCollisionStrong.play()
                 } else {
-                    /*todo: wrong suit ball first touched (done)
-                            8 ball touched first (done)
-                    */
                     ballCollision.play()
 
                     if (bodyA.collisionFilter.category === this.cueBall.body.collisionFilter.category) {
@@ -389,7 +424,11 @@ export default class Scene_8BallPool extends Phaser.Scene {
                             if (playerGroup === 'undefined') {
                                 if (bodyB.gameObject.texture.key !== "ball_8") this.correctCategoryBallHit = true
                             } else {
-                                this.correctCategoryBallHit = (playerGroup === "this.solids" && this.solids.includes(bodyB.gameObject)) || (playerGroup === "this.stripes" && this.stripes.includes(bodyB.gameObject));
+                                if (bodyB.gameObject.texture.key === "ball_8") {
+                                    this.correctCategoryBallHit = (playerGroup === "this.solids" && this.solids.length === 0) || (playerGroup === 'this.stripes' && this.stripes.length === 0)
+                                } else {
+                                    this.correctCategoryBallHit = (playerGroup === "this.solids" && this.solids.includes(bodyB.gameObject)) || (playerGroup === "this.stripes" && this.stripes.includes(bodyB.gameObject))
+                                }
                             }
                         }
                     } else if (bodyB.collisionFilter.category === this.cueBall.body.collisionFilter.category) {
@@ -397,7 +436,11 @@ export default class Scene_8BallPool extends Phaser.Scene {
                             if (playerGroup === 'undefined') {
                                 if (bodyA.gameObject.texture.key !== "ball_8") this.correctCategoryBallHit = true
                             } else {
-                                this.correctCategoryBallHit = (playerGroup === "this.solids" && this.solids.includes(bodyA.gameObject)) || (playerGroup === "this.stripes" && this.stripes.includes(bodyA.gameObject));
+                                if (bodyA.gameObject.texture.key === "ball_8") {
+                                    this.correctCategoryBallHit = (playerGroup === "this.solids" && this.solids.length === 0) || (playerGroup === 'this.stripes' && this.stripes.length === 0)
+                                } else {
+                                    this.correctCategoryBallHit = (playerGroup === "this.solids" && this.solids.includes(bodyA.gameObject)) || (playerGroup === "this.stripes" && this.stripes.includes(bodyA.gameObject))
+                                }
                             }
                         }
                     }
@@ -491,6 +534,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         let cuePosition = this.cue.body.position
         let velocityVector = new Phaser.Math.Vector2(ballPosition.x - cuePosition.x, ballPosition.y - cuePosition.y)
         let angle = velocityVector.angle() + Math.PI / 2
+
         if (moveCue) {
             this.moveLine = true
             if (this.noBallTouchedRest) {
@@ -508,6 +552,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         } else {
             // console.log('#solids:', this.solids.length)
             // console.log('#stripes: ', this.stripes.length)
+            this.turn.text = `PLAYER ${this.currentPlayer}'s turn`
 
             this.cue.setCollidesWith([this.cueBallCategory])
             if (!this.assigned) {
@@ -516,11 +561,15 @@ export default class Scene_8BallPool extends Phaser.Scene {
                     this.assigned = true
                     this.playerBalls[this.currentPlayer] = 'this.solids'
                     this.playerBalls[3 - this.currentPlayer] = 'this.stripes'
+                    this.add.text(130, 35, `PLAYER ${this.currentPlayer}: `, {font: '25px'})
+                    this.add.text(815, 35, `PLAYER ${3 - this.currentPlayer}: `, {font: '25px'})
                 } else if (this.stripes.length < this.numStripes && this.solids.length === this.numSolids) {
                     //only stripe ball(s) went in => curr player is stripes
                     this.assigned = true
                     this.playerBalls[this.currentPlayer] = 'this.stripes'
                     this.playerBalls[3 - this.currentPlayer] = 'this.solids'
+                    this.add.text(815, 35, `PLAYER ${this.currentPlayer}: `, {font: '25px'})
+                    this.add.text(130, 35, `PLAYER ${3 - this.currentPlayer}: `, {font: '25px'})
                 }
                 this.numSolids = this.solids.length
                 this.numStripes = this.stripes.length
