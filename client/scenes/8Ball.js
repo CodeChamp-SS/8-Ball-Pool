@@ -6,6 +6,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
     preload() {
         this.scale.scaleMode = Phaser.Scale.CENTER_BOTH;
         this.load.image('board', 'assets/table.png');
+        this.load.image('gameOver', 'assets/gameOver.jpg')
         this.load.spritesheet('ball_1',
             'assets/ball_1.png',
             {frameWidth: 145, frameHeight: 141}
@@ -56,7 +57,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         );
         this.load.spritesheet('ball_13',
             'assets/ball_13.png',
-            {frameWidth: 145, frameHeight: 141}
+            {frameWidth: 439, frameHeight: 441}
         );
         this.load.spritesheet('ball_14',
             'assets/ball_14.png',
@@ -80,6 +81,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.load.audio('pocket', ['assets/sounds/pocket.mp3'])
         this.load.audio('cue_collision_strong', ['assets/sounds/cue_collision_strong.mp3'])
         this.load.audio('cue_collision_weak', ['assets/sounds/cue_collision_weak.mp3'])
+        this.load.audio('game_over', ['assets/sounds/win.mp3'])
     }
 
     createBall(x, y, key) {
@@ -91,7 +93,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
             radius: 22.5,
         });
         ball.setBounce(1);
-        ball.setFriction(0.7, 0.01);
+        ball.setFriction(0, 0.02, 0.5);
         if (key === 'ball_16') {
             // ball.setVelocity(50, 0);
             // ball.setAngularVelocity(0)
@@ -108,18 +110,18 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.createBall(1000, 320, 'ball_2')
         this.createBall(1050, 290, 'ball_3')
         this.createBall(1100, 260, 'ball_4')
-        this.createBall(1150, 230, 'ball_12')
+        this.createBall(1150, 470, 'ball_5')
+        this.createBall(1152, 290, 'ball_6')
+        this.createBall(1102, 380, 'ball_7')
+        this.createBall(1052, 350, 'ball_8')
         this.createBall(1000, 380, 'ball_9')
         this.createBall(1050, 410, 'ball_10')
         this.createBall(1100, 440, 'ball_11')
-        this.createBall(1150, 470, 'ball_5')
-        this.createBall(1052, 350, 'ball_8')
-        this.createBall(1102, 320, 'ball_14')
-        this.createBall(1152, 290, 'ball_6')
-        this.createBall(1102, 380, 'ball_7')
+        this.createBall(1150, 230, 'ball_12')
         this.createBall(1152, 410, 'ball_13')
+        this.createBall(1102, 320, 'ball_14')
         this.createBall(1152, 350, 'ball_15')
-        this.createBall(342, 350, 'ball_16')
+        this.createBall(370, 350, 'ball_16')
     }
 
     createCushion(x, y, sideSlope, height, width, angle = 0) {
@@ -130,12 +132,13 @@ export default class Scene_8BallPool extends Phaser.Scene {
         })
         cushion.setRotation(angle)
         cushion.setVisible(false)
-        cushion.setBounce(0.8)
+        cushion.setBounce(0.9)
         cushion.setStatic(true)
         cushion.setFrictionStatic(0.1)
         cushion.displayHeight = height
         cushion.displayWidth = width
         cushion.setCollisionCategory(this.cushionCategory)
+        cushion.setCollidesWith([this.ballCategory, this.cueBallCategory])
         return cushion
     }
 
@@ -150,7 +153,41 @@ export default class Scene_8BallPool extends Phaser.Scene {
         pot.displayWidth = 45
         pot.setStatic(true)
         pot.setCollisionCategory(this.potCategory)
+        pot.setCollidesWith([this.ballCategory, this.cueBallCategory])
         return pot
+    }
+
+    createRacks(){
+        this.solidsRack = {}
+        this.stripesRack = {}
+        this.add.rectangle(480,38 , 420, 50, 0x000000, 0.7)
+        this.add.rectangle(1160, 38, 420, 50, 0x000000, 0.7)
+        for (let i = 0; i < 15; i++){
+            if (i < 7){
+                let solidBall = this.matter.add.sprite(300 + 60 * i, 40, `ball_${i + 1}`)
+                solidBall.displayHeight = 40
+                solidBall.displayWidth = 40
+                solidBall.setBody({
+                    type: 'circle',
+                    radius: 20
+                })
+                solidBall.setStatic(true)
+                this.solidsRack[this.balls[i].texture.key] = solidBall
+            }
+            if (i > 7){
+                let stripeBall = this.matter.add.sprite(500 + 60 * i, 40, `ball_${i + 1}`)
+                stripeBall.displayHeight = 40
+                stripeBall.displayWidth = 40
+                stripeBall.setBody({
+                    type: 'circle',
+                    radius: 20
+                })
+                stripeBall.setStatic(true)
+                this.stripesRack[this.balls[i].texture.key] = stripeBall
+            }
+        }
+        console.log('solids rack: ', this.solidsRack)
+        console.log('stripes rack: ', this.stripesRack)
     }
 
     create() {
@@ -165,8 +202,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.cushionCategory = this.matter.world.nextCategory();
         this.potCategory = this.matter.world.nextCategory()
 
-        // x: 95 y: 90
-        // width: 1355 height: 600
         let boundary = this.matter.world.setBounds(35, 25, 1375, 730, 1)
         boundary.disableGravity();
 
@@ -185,14 +220,21 @@ export default class Scene_8BallPool extends Phaser.Scene {
         let pot6 = this.createPot(70, 710)
 
         this.balls = []
+        this.solids = []
+        this.stripes = []
+        this.replace8Ball = false
         this.createBalls()
-        pot1.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        pot2.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        pot3.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        pot4.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        pot5.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        pot6.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        let potMask = pot1.body.collisionFilter.mask
+        this.createRacks()
+        for (let i = 0; i < 15; i++) {
+            if (i < 7) this.solids.push(this.balls[i])
+            if (i > 7) this.stripes.push(this.balls[i])
+        }
+
+        console.log(this.solids)
+        console.log(this.stripes)
+
+        let potCategory = pot1.body.collisionFilter.category
+        console.log(pot1.body.collisionFilter, cushion1.body.collisionFilter)
 
         this.cue = this.matter.add.sprite(250, 370, 'cue')
         this.cue.setBody({
@@ -200,21 +242,13 @@ export default class Scene_8BallPool extends Phaser.Scene {
             slope: 0.5
         })
         this.cue.setBounce(1)
-        this.cue.setMass(10)
         this.cue.setFrictionAir(0.5)
         this.cue.setRotation(Math.PI / 2)
         this.cue.setCollisionCategory(this.cueCategory)
         this.cue.setCollidesWith([this.cueBallCategory])
-        let cueMask = this.cue.body.collisionFilter.mask
-        let categories = [this.ballCategory, this.cueBallCategory, this.cushionCategory]
+        let cueMask = this.cue.body.collisionFilter.category
+        let categories = [this.ballCategory, this.cueBallCategory, this.cushionCategory, this.potCategory]
 
-        cushion1.setCollidesWith(categories)
-        cushion2.setCollidesWith(categories)
-        cushion3.setCollidesWith(categories)
-        cushion4.setCollidesWith(categories)
-        cushion5.setCollidesWith(categories)
-        cushion6.setCollidesWith(categories)
-        categories.push(this.potCategory)
         this.balls.forEach(ball => {
             ball.setCollidesWith(categories)
         })
@@ -232,65 +266,185 @@ export default class Scene_8BallPool extends Phaser.Scene {
         let cushionCollision = this.sound.add('cushion_collision', {loop: false})
         this.foul = this.sound.add('foul', {loop: false})
         let pocket = this.sound.add('pocket', {loop: false})
+        this.gameOverSound = this.sound.add('game_over', {loop: false})
 
-        this.cueSpeed = 0
-
+        this.breakShot = true
+        this.gameStarted = true
         this.input.on('pointerdown', this.startDrag, this)
-        // this.input.on('pointerup', this.onRelease, this);
+        this.cueBall.setInteractive()
 
         this.noBallTouched = false
         this.noBallTouchedRest = true
         this.cushionTouchedAfterHittingBall = true
+        this.assigned = false
+        this.correctCategoryBallHit = true
+        this.correctBallPotted = false
+        this.currentPlayer = 1
+        this.playerSwitched = true
+        this.playerBalls = {}
+
+        this.numSolids = this.solids.length
+        this.numStripes = this.stripes.length
+
+        const style = {font: '18px'}
+        this.turn = this.add.text(700, 0, "PLAYER 1's turn", style)
 
         this.matter.world.on("collisionstart", (event) => {
             event.pairs.forEach((pair) => {
                 const {bodyA, bodyB} = pair;
-                // console.log(bodyA.collisionFilter.mask)
-                // console.log(bodyB.collisionFilter.mask)
-                if (bodyA.collisionFilter.mask === potMask) {
-                    if (bodyB.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask) {
+                // console.log(bodyA.collisionFilter.category)
+                // console.log(bodyB.collisionFilter.category)
+                let playerGroup = `${this.playerBalls[this.currentPlayer]}`
+                console.log(playerGroup)
+                if (bodyA.collisionFilter.category === potCategory) {
+                    if (bodyB.collisionFilter.category !== this.cueBall.body.collisionFilter.category) {
                         let ball = bodyB.gameObject
                         console.log(bodyB.gameObject)
                         bodyB.gameObject.destroy()
                         pocket.play()
-                        this.cushionTouchedAfterHittingBall = true
-                        let index = this.balls.indexOf(ball);
-                        if (index !== -1) {
-                            this.balls.splice(index, 1);
-                        }
-                    } else {
-                        this.foulMade()
-                    }
-                } else if (bodyB.collisionFilter.mask === potMask) {
-                    if (bodyA.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask) {
-                        let ball = bodyA.gameObject
-                        console.log(bodyA.gameObject)
-                        bodyA.gameObject.destroy()
-                        pocket.play()
-                        this.cushionTouchedAfterHittingBall = true
                         let index = this.balls.indexOf(ball);
                         if (index !== -1) {
                             this.balls.splice(index, 1);
                             this.input.on('pointerDown', this.startDrag, this)
                         }
+                        this.cushionTouchedAfterHittingBall = true
+
+                        if (ball.texture.key === 'ball_8') {
+                            if (playerGroup !== 'undefined') {
+                                if (this.playerBalls[playerGroup].length) {
+                                    console.log(`Player ${this.currentPlayer ^ 3} wins`)
+                                    console.log(`Player ${this.currentPlayer} loses`)
+                                } else {
+                                    console.log(`Player ${this.currentPlayer} wins`)
+                                    console.log(`Player ${this.currentPlayer ^ 3} loses`)
+                                }
+                                this.gameOver()
+                            } else {
+                                this.replace8Ball = true
+                                this.foulMade()
+                            }
+                        } else {
+                            let solidsIndex = this.solids.indexOf(ball);
+                            let stripesIndex = this.stripes.indexOf(ball);
+                            console.log('solids idx: ', solidsIndex)
+                            console.log('stripes idx: ', stripesIndex)
+
+                            if (solidsIndex !== -1) {
+                                this.solidsRack[ball.texture.key].destroy()
+                                delete this.solidsRack[ball.texture.key]
+                                if (playerGroup === 'undefined') playerGroup = 'this.solids'
+                                if (playerGroup === 'this.solids') {
+                                    this.solids.splice(solidsIndex, 1);
+                                    this.correctBallPotted = true
+                                }
+                            }
+                            if (stripesIndex !== -1) {
+                                this.stripesRack[ball.texture.key].destroy()
+                                delete this.stripesRack[ball.texture.key]
+                                if (playerGroup === 'undefined') playerGroup = 'this.stripes'
+                                if (playerGroup === 'this.stripes') {
+                                    this.stripes.splice(stripesIndex, 1);
+                                    this.correctBallPotted = true
+                                }
+                            }
+                        }
                     } else {
                         this.foulMade()
                     }
-                } else if (bodyA.collisionFilter.mask === cushion1.body.collisionFilter.mask || bodyB.collisionFilter.mask === cushion1.body.collisionFilter.mask) {
-                    if (bodyA.collisionFilter.mask === cushion1.body.collisionFilter.mask) {
-                        if (bodyB.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask && !this.noBallTouched) {
+                } else if (bodyB.collisionFilter.category === potCategory) {
+                    if (bodyA.collisionFilter.category !== this.cueBall.body.collisionFilter.category) {
+                        let ball = bodyA.gameObject
+                        console.log(bodyA.gameObject)
+                        bodyA.gameObject.destroy()
+                        pocket.play()
+                        let index = this.balls.indexOf(ball);
+                        if (index !== -1) {
+                            this.balls.splice(index, 1);
+                            this.input.on('pointerDown', this.startDrag, this)
+                        }
+                        this.cushionTouchedAfterHittingBall = true
+                        if (ball.texture.key === 'ball_8') {
+                            if (playerGroup !== 'undefined') {
+                                if (this.playerBalls[playerGroup].length) {
+                                    console.log(`Player ${this.currentPlayer ^ 3} wins`)
+                                    console.log(`Player ${this.currentPlayer} loses`)
+                                } else {
+                                    console.log(`Player ${this.currentPlayer} wins`)
+                                    console.log(`Player ${this.currentPlayer ^ 3} loses`)
+                                }
+                                this.gameOver()
+                            } else {
+                                this.replace8Ball = true
+                                this.foulMade()
+                            }
+                        } else {
+                            let solidsIndex = this.solids.indexOf(ball);
+                            let stripesIndex = this.stripes.indexOf(ball);
+
+                            if (solidsIndex !== -1) {
+                                this.solidsRack[ball.texture.key].destroy()
+                                delete this.solidsRack[ball.texture.key]
+                                if (playerGroup === 'undefined') playerGroup = 'this.solids'
+                                if (playerGroup === 'this.solids') {
+                                    this.solids.splice(solidsIndex, 1);
+                                    this.correctBallPotted = true
+                                }
+                            }
+                            if (stripesIndex !== -1) {
+                                this.stripesRack[ball.texture.key].destroy()
+                                delete this.stripesRack[ball.texture.key]
+                                if (playerGroup === 'undefined') playerGroup = 'this.stripes'
+                                if (playerGroup === 'this.stripes') {
+                                    this.stripes.splice(stripesIndex, 1);
+                                    this.correctBallPotted = true
+                                }
+                            }
+                        }
+                    } else {
+                        this.foulMade()
+                    }
+                } else if (bodyA.collisionFilter.category === cushion1.body.collisionFilter.category || bodyB.collisionFilter.category === cushion1.body.collisionFilter.category) {
+                    if (bodyA.collisionFilter.category === cushion1.body.collisionFilter.category) {
+                        if (bodyB.collisionFilter.category !== this.cueBall.body.collisionFilter.category && !this.noBallTouched) {
                             this.cushionTouchedAfterHittingBall = true
                         }
                     } else {
-                        if (bodyA.collisionFilter.mask !== this.cueBall.body.collisionFilter.mask && !this.noBallTouched) {
+                        if (bodyA.collisionFilter.category !== this.cueBall.body.collisionFilter.category && !this.noBallTouched) {
                             this.cushionTouchedAfterHittingBall = true
                         }
                     }
                     cushionCollision.play()
-                } else if (bodyA.collisionFilter.mask === cueMask || bodyB.collisionFilter.mask === cueMask) {
+                } else if (bodyA.collisionFilter.category === cueMask || bodyB.collisionFilter.category === cueMask) {
                     cueCollisionStrong.play()
                 } else {
                     ballCollision.play()
+
+                    if (bodyA.collisionFilter.category === this.cueBall.body.collisionFilter.category) {
+                        if (this.noBallTouched) {
+                            if (playerGroup === 'undefined') {
+                                if (bodyB.gameObject.texture.key !== "ball_8") this.correctCategoryBallHit = true
+                            } else {
+                                if (bodyB.gameObject.texture.key === "ball_8") {
+                                    this.correctCategoryBallHit = (playerGroup === "this.solids" && this.solids.length === 0) || (playerGroup === 'this.stripes' && this.stripes.length === 0)
+                                } else {
+                                    this.correctCategoryBallHit = (playerGroup === "this.solids" && this.solids.includes(bodyB.gameObject)) || (playerGroup === "this.stripes" && this.stripes.includes(bodyB.gameObject))
+                                }
+                            }
+                        }
+                    } else if (bodyB.collisionFilter.category === this.cueBall.body.collisionFilter.category) {
+                        if (this.noBallTouched) {
+                            if (playerGroup === 'undefined') {
+                                if (bodyA.gameObject.texture.key !== "ball_8") this.correctCategoryBallHit = true
+                            } else {
+                                if (bodyA.gameObject.texture.key === "ball_8") {
+                                    this.correctCategoryBallHit = (playerGroup === "this.solids" && this.solids.length === 0) || (playerGroup === 'this.stripes' && this.stripes.length === 0)
+                                } else {
+                                    this.correctCategoryBallHit = (playerGroup === "this.solids" && this.solids.includes(bodyA.gameObject)) || (playerGroup === "this.stripes" && this.stripes.includes(bodyA.gameObject))
+                                }
+                            }
+                        }
+                    }
+
                     this.noBallTouched = false
                 }
             });
@@ -309,7 +463,22 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.cueBall.setToSleep().setInteractive().setVisible(false)
         this.cue.setToSleep()
         this.cueBall.setCollidesWith([])
+        if (this.replace8Ball) {
+            this.createBall(1052, 350, 'ball_8')
+            this.replace8Ball = false
+        }
+        this.correctBallPotted = false
         this.noBallTouched = false
+    }
+
+    gameOver() {
+        this.cueBall.destroy()
+        this.cue.destroy()
+        this.board = this.add.image(0, 0, 'gameOver');
+        this.board.setOrigin(0, 0)
+        this.board.displayWidth = this.sys.canvas.width
+        this.board.displayHeight = this.sys.canvas.height
+        this.gameOverSound.play()
     }
 
     startDrag(pointer, targets) {
@@ -331,32 +500,29 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.input.off('pointermove', this.doDrag, this);
         this.input.off('pointerup', this.stopDrag, this);
         let ballPosition = this.cueBall.body.position
+        console.log(this.breakShot)
+        if (this.breakShot) {
+            if (ballPosition.x >= 370) {
+                console.log('position reset')
+                this.cueBall.setPosition(370, ballPosition.y)
+            }
+        }
         this.graphics.clear()
-        // console.log(ballPosition.x, ballPosition.y)
         this.line = new Phaser.Geom.Line(ballPosition.x, ballPosition.y, ballPosition.x + 1200, ballPosition.y)
         this.graphics.strokeLineShape(this.line)
         this.moveLine = true
         this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
     }
 
-    /*onRelease(pointer) {
-        if (pointer.leftButtonReleased()) {
-            console.log('Left Button was released', this.cueSpeed);
-            if (this.cueSpeed > 0) {
-            }
-        }
-    }*/
-
     f(x) {
         return 50 / Math.pow(3, x) + 25
     }
 
     update() {
+        if (this.cueBall.body === undefined || this.cue.body === undefined) return
         let ballPosition = this.cueBall.body.position
         let moveCue = false
 
-        let pointer = this.input.activePointer;
-        // if(pointer.isDown) console.log("power increasing")
         this.circles = []
 
         this.balls.forEach(ball => {
@@ -368,23 +534,70 @@ export default class Scene_8BallPool extends Phaser.Scene {
         let cuePosition = this.cue.body.position
         let velocityVector = new Phaser.Math.Vector2(ballPosition.x - cuePosition.x, ballPosition.y - cuePosition.y)
         let angle = velocityVector.angle() + Math.PI / 2
+
         if (moveCue) {
             this.moveLine = true
             if (this.noBallTouchedRest) {
                 this.noBallTouched = true
                 this.cushionTouchedAfterHittingBall = false
                 this.noBallTouchedRest = false
+                this.correctCategoryBallHit = false
             }
             this.graphics.clear()
             this.cue.setVisible(false)
-            this.cue.setToSleep()
+            this.cue.setCollidesWith([])
             this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
+            this.breakShot = false
+            this.playerSwitched = false
         } else {
-            if (this.noBallTouched || !this.cushionTouchedAfterHittingBall) {
+            // console.log('#solids:', this.solids.length)
+            // console.log('#stripes: ', this.stripes.length)
+            this.turn.text = `PLAYER ${this.currentPlayer}'s turn`
+
+            this.cue.setCollidesWith([this.cueBallCategory])
+            if (!this.assigned) {
+                if (this.solids.length < this.numSolids && this.stripes.length === this.numStripes) {
+                    //only solid ball(s) went in => curr player is solids
+                    this.assigned = true
+                    this.playerBalls[this.currentPlayer] = 'this.solids'
+                    this.playerBalls[3 - this.currentPlayer] = 'this.stripes'
+                    this.add.text(130, 35, `PLAYER ${this.currentPlayer}: `, {font: '25px'})
+                    this.add.text(815, 35, `PLAYER ${3 - this.currentPlayer}: `, {font: '25px'})
+                } else if (this.stripes.length < this.numStripes && this.solids.length === this.numSolids) {
+                    //only stripe ball(s) went in => curr player is stripes
+                    this.assigned = true
+                    this.playerBalls[this.currentPlayer] = 'this.stripes'
+                    this.playerBalls[3 - this.currentPlayer] = 'this.solids'
+                    this.add.text(815, 35, `PLAYER ${this.currentPlayer}: `, {font: '25px'})
+                    this.add.text(130, 35, `PLAYER ${3 - this.currentPlayer}: `, {font: '25px'})
+                }
+                this.numSolids = this.solids.length
+                this.numStripes = this.stripes.length
+            } else {
+                console.log(this.playerBalls)
+            }
+            if (!this.playerSwitched) {
+                console.log("Player Switched", this.correctBallPotted)
+                this.currentPlayer ^= 3
+            }
+
+            console.log('Player ', this.currentPlayer, this.playerSwitched)
+
+            if (this.noBallTouched || !this.cushionTouchedAfterHittingBall || !this.correctCategoryBallHit) {
                 this.foulMade()
+                if (this.gameStarted) this.breakShot = true
                 this.noBallTouched = false
                 this.cushionTouchedAfterHittingBall = true
+                this.correctCategoryBallHit = true
+            } else if (this.correctBallPotted && !this.playerSwitched) {
+                console.log("Player switched back")
+                this.currentPlayer ^= 3
             }
+            this.playerSwitched = true
+            if (!this.breakShot) {
+                this.gameStarted = false
+            }
+
             this.cue.setAwake()
             if (!this.cueBall.visible) {
                 this.cueBall.setPosition(342, 350)
@@ -392,17 +605,12 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 this.matter.body.setPosition(this.cue.body, this.matter.vector.create(this.cueBall.body.position.x - 410, this.cueBall.body.position.y))
                 this.cueBall.setVisible(true).setAwake()
             }
-            // ballPosition.x + 1200, ballPosition.y
             this.balls.forEach(ball => {
                 if (ball.body.position !== ballPosition) {
                     let circle = new Phaser.Geom.Circle(ball.body.position.x, ball.body.position.y, 22.5)
-                    // console.log(circle.x)
-                    // console.log(ball.texture.key)
-                    // this.graphics.strokeCircle(circle.x, circle.y, circle.radius)
                     this.circles.push(circle)
                 }
             })
-            // console.log(this.circleID)
 
             if (this.moveLine) {
                 ballPosition = this.cueBall.body.position
@@ -414,13 +622,9 @@ export default class Scene_8BallPool extends Phaser.Scene {
                     let helperLineUp = new Phaser.Geom.Line(ballPosition.x, ballPosition.y - 22.5 + .9 * i, ballPosition.x + 1200, ballPosition.y - 22.5 + .9 * i)
                     let helperLineDown = new Phaser.Geom.Line(ballPosition.x, ballPosition.y + .9 * (i + 1), ballPosition.x + 1200, ballPosition.y + .9 * (i + 1))
                     this.helperLines.push(helperLineUp, helperLineDown)
-                    // this.graphics.strokeLineShape(helperLineUp)
-                    // this.graphics.strokeLineShape(helperLineDown)
                 }
                 console.log(this.helperLines)
                 this.graphics.strokeLineShape(this.line)
-                // this.graphics.strokeLineShape(this.helperLines[1])
-                // this.graphics.strokeLineShape(this.helperLines[this.helperLines.length - 1])
                 this.moveLine = false
             }
             this.cue.setVisible(true)
@@ -433,8 +637,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
                     Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, -Math.PI / 360)
                 })
                 this.graphics.strokeLineShape(this.line)
-                // this.graphics.strokeLineShape(this.helperLines[1])
-                // this.graphics.strokeLineShape(this.helperLines[this.helperLines.length - 1])
             }
             this.matter.body.rotate(this.cue.body, -Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
         } else if (this.cursors.right.isDown) {
@@ -444,8 +646,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
                     Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, Math.PI / 360)
                 })
                 this.graphics.strokeLineShape(this.line)
-                // this.graphics.strokeLineShape(this.helperLines[1])
-                // this.graphics.strokeLineShape(this.helperLines[this.helperLines.length - 1])
             }
             this.matter.body.rotate(this.cue.body, Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
         }
@@ -466,15 +666,9 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 }
             })
         })
-        // console.log(pt)
         if (pt !== undefined) {
             this.graphics.clear()
-            this.graphics.fillPoint(pt.x, pt.y, 3)
-            // this.graphics.strokeLineShape(this.line)
-            // this.graphics.strokeLineShape(this.helperLines[this.helperLines.length - 1])
 
-            // this.graphics.fillPoint(pt.x, pt.y, 10)
-            // let slope = Phaser.Geom.Line.Slope(this.line)
             let centreLine = new Phaser.Geom.Line(pt.x, pt.y, circleCentre[0], circleCentre[1])
             Phaser.Geom.Line.Extend(centreLine, -22.5, 50)
             let angle = Phaser.Geom.Line.Angle(centreLine)
@@ -485,15 +679,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
             this.graphics.strokeLineShape(this.line)
             this.graphics.strokeLineShape(centreLine)
             this.graphics.strokeCircle(this.guideCircle.x, this.guideCircle.y, this.guideCircle.radius)
-            /*Phaser.Geom.Line.Extend(centreLine, 100, 100)
-            let intersection = Phaser.Geom.Intersects.GetLineToLine(centreLine, this.line)
-            console.log(intersection.x)
-            console.log(intersection.y)*/
-            // centreLine.x1 = circleCentre.x
-            // centreLine.y1 = circleCentre.y
-            // console.log(slope)
-            // this.guideCircle = new Phaser.Geom.Circle(intersection.x, intersection.y, 22.5)
-            // this.guideCircle = new Phaser.Geom.Circle(pt.x - 22.5 * Math.cos(slope), pt.y - 22.5 * Math.sin(slope), 22.5)
         }
 
         if (this.cursors.down.isDown) {
@@ -506,7 +691,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 this.cue.setVelocity(velocityV.x, velocityV.y)
             }
         }
-        // console.log(this.hit)
         if (this.cursors.down.isUp && this.hit) {
             this.hit = false
             let duration = this.cursors.down.duration
@@ -515,11 +699,11 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 let speed = ((duration + this.f(duration)) * 1.25) / 600
                 speed = Math.min(speed, 4.5)
                 console.log("speed = ", speed)
-                // console.log(duration)
                 this.cueBall.setCollidesWith(this.cueBallCollidesWith)
                 this.cueBall.disableInteractive()
                 this.matter.applyForceFromAngle(this.cue.body, speed, angle - Math.PI / 2)
                 this.noBallTouchedRest = true
+                this.correctBallPotted = false
             }
         }
     }
