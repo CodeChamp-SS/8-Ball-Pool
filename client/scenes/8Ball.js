@@ -311,7 +311,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
 
                         if (ball.texture.key === 'ball_8') {
                             if (playerGroup !== 'undefined') {
-                                if (this.playerBalls[playerGroup].length) {
+                                if (playerGroup.length) {
                                     console.log(`Player ${this.currentPlayer ^ 3} wins`)
                                     console.log(`Player ${this.currentPlayer} loses`)
                                 } else {
@@ -365,7 +365,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         this.cushionTouchedAfterHittingBall = true
                         if (ball.texture.key === 'ball_8') {
                             if (playerGroup !== 'undefined') {
-                                if (this.playerBalls[playerGroup].length) {
+                                if (playerGroup.length) {
                                     console.log(`Player ${this.currentPlayer ^ 3} wins`)
                                     console.log(`Player ${this.currentPlayer} loses`)
                                 } else {
