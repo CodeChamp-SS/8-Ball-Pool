@@ -6,6 +6,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
     preload() {
         this.scale.scaleMode = Phaser.Scale.CENTER_BOTH;
         this.load.image('board', 'assets/table.png');
+        this.load.image('gameOver', 'assets/gameOver.jpg')
         this.load.spritesheet('ball_1',
             'assets/ball_1.png',
             {frameWidth: 145, frameHeight: 141}
@@ -57,6 +58,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
         this.load.audio('pocket', ['assets/sounds/pocket.mp3'])
         this.load.audio('cue_collision_strong', ['assets/sounds/cue_collision_strong.mp3'])
         this.load.audio('cue_collision_weak', ['assets/sounds/cue_collision_weak.mp3'])
+        this.load.audio('game_over', ['assets/sounds/win.mp3'])
     }
 
     createBall(x, y, key) {
@@ -68,17 +70,21 @@ export default class Scene_9BallPool extends Phaser.Scene {
             radius: 22.5,
         });
         ball.setBounce(1);
-        ball.setFriction(0.7, 0.01);
+        ball.setFriction(0, 0.01, 0.1);
         if (key === 'ball_16') {
             this.cueBall = ball
             ball.setCollisionCategory(this.cueBallCategory)
         } else {
             ball.setCollisionCategory(this.ballCategory)
         }
-        this.balls.push(ball)
+        if (this.reset9Ball) {
+            this.balls.splice(this.balls.length - 1, 0, ball)
+            console.log(this.balls.indexOf(ball))
+        }
+        else this.balls.push(ball)
     }
 
-    createBalls(){
+    createBalls() {
         this.createBall(960, 350, 'ball_1')
         this.createBall(997, 370, 'ball_2')
         this.createBall(997, 325, 'ball_3')
@@ -88,7 +94,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
         this.createBall(1082, 327, 'ball_7')
         this.createBall(1120, 355, 'ball_8')
         this.createBall(1040, 350, 'ball_9')
-        this.createBall(342, 350, 'ball_16')
+        this.createBall(370, 350, 'ball_16')
     }
 
     createCushion(x, y, sideSlope, height, width, angle = 0) {
@@ -105,6 +111,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
         cushion.displayHeight = height
         cushion.displayWidth = width
         cushion.setCollisionCategory(this.cushionCategory)
+        cushion.setCollidesWith([this.ballCategory, this.cueBallCategory])
         return cushion
     }
 
@@ -119,14 +126,32 @@ export default class Scene_9BallPool extends Phaser.Scene {
         pot.displayWidth = 45
         pot.setStatic(true)
         pot.setCollisionCategory(this.potCategory)
+        pot.setCollidesWith([this.ballCategory, this.cueBallCategory])
         return pot
     }
 
+    createRack(){
+        this.ballRack = {}
+        this.add.rectangle(420, 38 , 550, 50, 0x000000, 0.7)
+        for (let i = 0; i < 9; i++){
+            let ball = this.matter.add.sprite(180 + 60 * i, 40, `ball_${i + 1}`)
+            ball.displayHeight = 40
+            ball.displayWidth = 40
+            ball.setBody({
+                type: 'circle',
+                radius: 20
+            })
+            ball.setStatic(true)
+            this.ballRack[this.balls[i].texture.key] = ball
+        }
+        console.log(this.ballRack)
+    }
+
     create() {
-        let board = this.add.image(0, 0, 'board');
-        board.setOrigin(0, 0)
-        board.displayWidth = this.sys.canvas.width
-        board.displayHeight = this.sys.canvas.height
+        this.board = this.add.image(0, 0, 'board');
+        this.board.setOrigin(0, 0)
+        this.board.displayWidth = this.sys.canvas.width
+        this.board.displayHeight = this.sys.canvas.height
 
         this.ballCategory = this.matter.world.nextCategory();
         this.cueCategory = this.matter.world.nextCategory();
@@ -134,8 +159,6 @@ export default class Scene_9BallPool extends Phaser.Scene {
         this.cushionCategory = this.matter.world.nextCategory();
         this.potCategory = this.matter.world.nextCategory();
 
-        // x: 95 y: 90
-        // width: 1355 height: 600
         let boundary = this.matter.world.setBounds(35, 25, 1375, 730, 1)
         boundary.disableGravity();
 
@@ -154,13 +177,10 @@ export default class Scene_9BallPool extends Phaser.Scene {
         let pot6 = this.createPot(70, 710)
 
         this.balls = []
+        this.reset9Ball = false
         this.createBalls()
-        pot1.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        pot2.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        pot3.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        pot4.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        pot5.setCollidesWith([this.ballCategory, this.cueBallCategory])
-        pot6.setCollidesWith([this.ballCategory, this.cueBallCategory])
+        this.createRack()
+
         let potMask = pot1.body.collisionFilter.category
 
         this.cue = this.matter.add.sprite(250, 370, 'cue')
@@ -176,14 +196,8 @@ export default class Scene_9BallPool extends Phaser.Scene {
         this.cue.setCollidesWith([this.cueBallCategory])
         let cueMask = this.cue.body.collisionFilter.category
         let categories = [this.ballCategory, this.cueBallCategory, this.cushionCategory]
-
-        cushion1.setCollidesWith(categories)
-        cushion2.setCollidesWith(categories)
-        cushion3.setCollidesWith(categories)
-        cushion4.setCollidesWith(categories)
-        cushion5.setCollidesWith(categories)
-        cushion6.setCollidesWith(categories)
         categories.push(this.potCategory)
+
         this.balls.forEach(ball => {
             ball.setCollidesWith(categories)
         })
@@ -201,13 +215,23 @@ export default class Scene_9BallPool extends Phaser.Scene {
         let cushionCollision = this.sound.add('cushion_collision', {loop: false})
         this.foul = this.sound.add('foul', {loop: false})
         let pocket = this.sound.add('pocket', {loop: false})
+        this.gameOverSound = this.sound.add('game_over', {loop: false})
 
+        this.breakShot = true
+        this.gameStarted = true
         this.input.on('pointerdown', this.startDrag, this)
+        this.cueBall.setInteractive()
 
         this.noBallTouched = false
         this.noBallTouchedRest = true
         this.cushionTouchedAfterHittingBall = true
         this.lowestBallHit = true
+        this.currentPlayer = 1
+        this.playerSwitched = true
+        this.ballPotted = true
+
+        const style = {font: '18px'}
+        this.turn = this.add.text(700, 0, "PLAYER 1's turn", style)
 
         this.matter.world.on("collisionstart", (event) => {
             event.pairs.forEach((pair) => {
@@ -215,103 +239,93 @@ export default class Scene_9BallPool extends Phaser.Scene {
 
                 if (bodyA.collisionFilter.category === potMask) {
                     if (bodyB.collisionFilter.category !== this.cueBall.body.collisionFilter.category) {
+                        this.ballPotted = true
                         pocket.play()
                         let ball = bodyB.gameObject
                         console.log(bodyB.gameObject)
-                        if (this.lowestBallHit) {
-                            if (ball.texture.key === 'ball_9') {
+                        if (ball.texture.key === 'ball_9') {
+                            if (this.lowestBallHit) {
                                 //game over, player wins if shot was legit
-                                console.log("Game over, player wins")
-                                return
-                            }
+                                console.log(`Player ${this.currentPlayer} wins`)
+                                console.log(`Player ${this.currentPlayer ^ 3} loses`)
+                                this.gameOver()
+                            } else this.reset9Ball = true
                         }
-                        /*else {
-                            this.foulMade()
-                        }*/
                         bodyB.gameObject.destroy()
                         this.cushionTouchedAfterHittingBall = true
                         let index = this.balls.indexOf(ball);
                         if (index !== -1) {
                             this.balls.splice(index, 1);
+                            this.ballRack[ball.texture.key].destroy()
+                            delete this.ballRack[ball.texture.key]
                             this.input.on('pointerDown', this.startDrag, this)
                         }
-                    }
-                    else {
+                    } else {
                         this.foulMade()
                     }
-                }
-                else if (bodyB.collisionFilter.category === potMask) {
+                } else if (bodyB.collisionFilter.category === potMask) {
                     if (bodyA.collisionFilter.category !== this.cueBall.body.collisionFilter.category) {
+                        this.ballPotted = true
                         pocket.play()
                         let ball = bodyA.gameObject
                         console.log(bodyA.gameObject)
-                        if (this.lowestBallHit) {
-                            if (ball.texture.key === 'ball_9') {
+                        if (ball.texture.key === 'ball_9') {
+                            if (this.lowestBallHit) {
                                 //game over, player wins if shot was legit
-                                console.log("Game over, player wins")
-                                return
-                            }
+                                console.log(`Player ${this.currentPlayer} wins`)
+                                console.log(`Player ${this.currentPlayer ^ 3} loses`)
+                                this.gameOver()
+                            } else this.reset9Ball = true
                         }
-                        /*else {
-                            this.foulMade()
-                        }*/
                         bodyA.gameObject.destroy()
                         this.cushionTouchedAfterHittingBall = true
                         let index = this.balls.indexOf(ball);
                         if (index !== -1) {
                             this.balls.splice(index, 1);
+                            this.ballRack[ball.texture.key].destroy()
+                            delete this.ballRack[ball.texture.key]
                             this.input.on('pointerDown', this.startDrag, this)
                         }
-                    }
-                    else {
+                    } else {
                         this.foulMade()
                     }
-                }
-                else if (bodyA.collisionFilter.category === cushion1.body.collisionFilter.category || bodyB.collisionFilter.category === cushion1.body.collisionFilter.category) {
+                } else if (bodyA.collisionFilter.category === cushion1.body.collisionFilter.category || bodyB.collisionFilter.category === cushion1.body.collisionFilter.category) {
                     if (bodyA.collisionFilter.category === cushion1.body.collisionFilter.category) {
                         if (bodyB.collisionFilter.category !== this.cueBall.body.collisionFilter.category && !this.noBallTouched) {
                             //object ball hits the cushion
                             this.cushionTouchedAfterHittingBall = true
+                            console.log('cushion touched')
                         }
-                    }
-                    else {
+                    } else {
                         if (bodyA.collisionFilter.category !== this.cueBall.body.collisionFilter.category && !this.noBallTouched) {
                             //object ball hits the cushion
                             this.cushionTouchedAfterHittingBall = true
+                            console.log('cushion touched')
                         }
                     }
                     cushionCollision.play()
-                }
-                else if (bodyA.collisionFilter.category === cueMask || bodyB.collisionFilter.category === cueMask) {
+                } else if (bodyA.collisionFilter.category === cueMask || bodyB.collisionFilter.category === cueMask) {
                     //collision of cue with cue ball
                     cueCollisionStrong.play()
-                }
-                else {
+                } else {
                     //cue ball to object ball
                     ballCollision.play()
+                    let lowestBall = this.balls[0]
+                    // console.log(lowestBall)
+
+                    console.log(lowestBall.texture.key)
+                    if (bodyA.collisionFilter.category === this.cueBall.body.collisionFilter.category) {
+                        if (bodyB.gameObject.texture.key === lowestBall.texture.key && !this.lowestBallHit && this.noBallTouched) {
+                            this.lowestBallHit = true
+                            console.log('lowest ball hit')
+                        }
+                    } else if (bodyB.collisionFilter.category === this.cueBall.body.collisionFilter.category) {
+                        if (bodyA.gameObject.texture.key === lowestBall.texture.key && !this.lowestBallHit && this.noBallTouched) {
+                            this.lowestBallHit = true
+                            console.log('lowest ball hit')
+                        }
+                    }
                     this.noBallTouched = false
-
-                    let ballHit = this.balls[0]
-                    console.log(ballHit)
-
-                    if (bodyA.collisionFilter.category === this.cueBall.body.collisionFilter.category){
-                        if (bodyB.collisionFilter.category === ballHit.body.collisionFilter.category && !this.lowestBallHit && this.noBallTouched){
-                            this.lowestBallHit = true
-                        }
-                        /*else{
-                            if (!this.lowestBallHit)
-                                this.foulMade()
-                        }*/
-                    }
-                    else if (bodyB.collisionFilter.category === this.cueBall.body.collisionFilter.category){
-                        if (bodyA.collisionFilter.category === ballHit.body.collisionFilter.category && !this.lowestBallHit && this.noBallTouched){
-                            this.lowestBallHit = true
-                        }
-                        /*else {
-                            if (!this.lowestBallHit)
-                                this.foulMade()
-                        }*/
-                    }
                 }
             });
         });
@@ -330,8 +344,30 @@ export default class Scene_9BallPool extends Phaser.Scene {
         this.cueBall.setToSleep().setInteractive().setVisible(false)
         this.cue.setToSleep()
         this.cueBall.setCollidesWith([])
-        this.noBallTouched = false
-        this.lowestBallHit = false
+        if (this.reset9Ball) {
+            this.createBall(1040, 350, 'ball_9')
+            let ball9 = this.matter.add.sprite(660, 40, 'ball_9')
+            ball9.displayHeight = 40
+            ball9.displayWidth = 40
+            ball9.setBody({
+                type: 'circle',
+                radius: 20
+            });
+            ball9.setStatic(true)
+            this.ballRack['ball_9'] = ball9
+            this.reset9Ball = false
+        }
+    }
+
+    gameOver() {
+        this.cueBall.destroy()
+        this.cue.destroy()
+        this.board = this.add.image(0, 0, 'gameOver');
+        this.board.setOrigin(0, 0)
+        this.board.displayWidth = this.sys.canvas.width
+        this.board.displayHeight = this.sys.canvas.height
+        this.gameOverSound.play()
+        console.log("Game over, player wins")
     }
 
     startDrag(pointer, targets) {
@@ -353,12 +389,17 @@ export default class Scene_9BallPool extends Phaser.Scene {
         this.input.off('pointermove', this.doDrag, this);
         this.input.off('pointerup', this.stopDrag, this);
         let ballPosition = this.cueBall.body.position
+        console.log(this.breakShot)
+        if (this.breakShot){
+            if (ballPosition.x >= 370) {
+                console.log('position reset')
+                this.cueBall.setPosition(370, ballPosition.y)
+            }
+        }
         this.graphics.clear()
-        // console.log(ballPosition.x, ballPosition.y)
         this.line = new Phaser.Geom.Line(ballPosition.x, ballPosition.y, ballPosition.x + 1200, ballPosition.y)
         this.graphics.strokeLineShape(this.line)
         this.moveLine = true
-        // this.lowestBallHit = false
         this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
     }
 
@@ -366,7 +407,8 @@ export default class Scene_9BallPool extends Phaser.Scene {
         return 50 / Math.pow(3, x) + 25
     }
 
-    update(){
+    update() {
+        if (this.cueBall.body === undefined || this.cue.body === undefined) return
         let ballPosition = this.cueBall.body.position
         let moveCue = false
 
@@ -392,17 +434,32 @@ export default class Scene_9BallPool extends Phaser.Scene {
                 this.lowestBallHit = false
             }
             this.graphics.clear()
+            this.cue.setCollidesWith([])
             this.cue.setVisible(false)
             this.cue.setToSleep()
             this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
-        }
-        else{
+            this.breakShot = false
+            this.playerSwitched = false
+        } else {
             // this.lowestBallHit = false
+            this.turn.text = `PLAYER ${this.currentPlayer}'s turn`
+            this.cue.setCollidesWith([this.cueBallCategory])
+            if (!this.playerSwitched) {
+                console.log("Player Switched", this.correctBallPotted)
+                this.currentPlayer ^= 3
+            }
             if (this.noBallTouched || !this.cushionTouchedAfterHittingBall || !this.lowestBallHit) {
                 this.foulMade()
-                this.lowestBallHit = true
                 this.noBallTouched = false
                 this.cushionTouchedAfterHittingBall = true
+                this.lowestBallHit = true
+            } else if (this.ballPotted && !this.playerSwitched){
+                this.currentPlayer ^= 3
+            }
+            this.playerSwitched = true
+
+            if (!this.breakShot){
+                this.gameStarted = false
             }
             this.cue.setAwake()
             if (!this.cueBall.visible) {
@@ -442,21 +499,20 @@ export default class Scene_9BallPool extends Phaser.Scene {
             if (!moveCue) {
                 this.graphics.clear()
                 this.helperLines.forEach(helpLine => {
-                    Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, -Math.PI / 360)
+                    Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, -Math.PI / 270)
                 })
                 this.graphics.strokeLineShape(this.line)
             }
-            this.matter.body.rotate(this.cue.body, -Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
-        }
-        else if (this.cursors.right.isDown) {
+            this.matter.body.rotate(this.cue.body, -Math.PI / 270, this.matter.vector.create(ballPosition.x, ballPosition.y))
+        } else if (this.cursors.right.isDown) {
             if (!moveCue) {
                 this.graphics.clear()
                 this.helperLines.forEach(helpLine => {
-                    Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, Math.PI / 360)
+                    Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, Math.PI / 270)
                 })
                 this.graphics.strokeLineShape(this.line)
             }
-            this.matter.body.rotate(this.cue.body, Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
+            this.matter.body.rotate(this.cue.body, Math.PI / 270, this.matter.vector.create(ballPosition.x, ballPosition.y))
         }
 
         //Finding point of contact:
@@ -501,7 +557,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
             if (this.cursors.down.getDuration() <= 2000) {
                 let v1 = new Phaser.Math.Vector2(this.cue.body.position)
                 v1.subtract(new Phaser.Math.Vector2(this.cueBall.body.position))
-                let velocityV = v1.normalize().scale(1)
+                let velocityV = v1.normalize().scale(3)
                 this.cue.setVelocity(velocityV.x, velocityV.y)
             }
         }
@@ -512,14 +568,14 @@ export default class Scene_9BallPool extends Phaser.Scene {
             duration = Math.min(duration, 2000)
             if (!moveCue) {
                 let speed = ((duration + this.f(duration)) * 1.25) / 600
-                speed = Math.min(speed, 3)
+                speed = Math.min(speed, 4.5)
                 console.log("speed = ", speed)
                 // console.log(duration)
                 this.cueBall.setCollidesWith(this.cueBallCollidesWith)
                 this.cueBall.disableInteractive()
                 this.matter.applyForceFromAngle(this.cue.body, speed, angle - Math.PI / 2)
                 this.noBallTouchedRest = true
-                // this.lowestBallHit = false
+                this.ballPotted = false
             }
         }
     }
