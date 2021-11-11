@@ -16,7 +16,7 @@ var config = {
             debug: true
         }
     },
-    scene: [Scene_9BallPool, Scene_8BallPool],
+    scene: [Scene_8BallPool, Scene_9BallPool],
 };
 
 var game = new Phaser.Game(config);

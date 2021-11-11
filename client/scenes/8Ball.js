@@ -205,18 +205,18 @@ export default class Scene_8BallPool extends Phaser.Scene {
         let boundary = this.matter.world.setBounds(35, 25, 1375, 730, 1)
         boundary.disableGravity();
 
-        let cushion1 = this.createCushion(410, 55, -0.1, 65, 540)
-        let cushion2 = this.createCushion(1045, 55, -0.1, 65, 540)
-        let cushion3 = this.createCushion(1380, 390, -0.2, 505, 60, Math.PI / 2)
-        let cushion4 = this.createCushion(65, 390, 0.2, 615, 60, Math.PI / 2)
-        let cushion5 = this.createCushion(410, 725, 0.1, 65, 595)
-        let cushion6 = this.createCushion(1045, 725, 0.1, 65, 595)
+        let cushion1 = this.createCushion(435, 66, -0.1, 45, 565)
+        let cushion2 = this.createCushion(1100, 66, -0.1, 45, 565)
+        let cushion3 = this.createCushion(1453, 390, -0.2, 505, 60, Math.PI / 2)
+        let cushion4 = this.createCushion(65, 390, 0.2, 630, 60, Math.PI / 2)
+        let cushion5 = this.createCushion(433, 718, 0.1, 50, 635)
+        let cushion6 = this.createCushion(1102, 715, 0.1, 45, 625)
 
         let pot1 = this.createPot(70, 65)
-        let pot2 = this.createPot(728, 40)
-        let pot3 = this.createPot(1380, 65)
-        let pot4 = this.createPot(1380, 710)
-        let pot5 = this.createPot(728, 740)
+        let pot2 = this.createPot(767, 40)
+        let pot3 = this.createPot(1461, 63)
+        let pot4 = this.createPot(1461, 710)
+        let pot5 = this.createPot(767, 740)
         let pot6 = this.createPot(70, 710)
 
         this.balls = []
