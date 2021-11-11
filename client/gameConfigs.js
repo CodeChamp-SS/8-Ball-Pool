@@ -1,5 +1,5 @@
-import Scene_9BallPool from './scenes/9Ball.js'
 import Scene_8BallPool from "./scenes/8Ball.js"
+import Scene_9BallPool from './scenes/9Ball.js'
 
 var config = {
     type: Phaser.AUTO,
