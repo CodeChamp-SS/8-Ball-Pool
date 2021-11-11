@@ -57,7 +57,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         );
         this.load.spritesheet('ball_13',
             'assets/ball_13.png',
-            {frameWidth: 439, frameHeight: 441}
+            {frameWidth: 145, frameHeight: 141}
         );
         this.load.spritesheet('ball_14',
             'assets/ball_14.png',
