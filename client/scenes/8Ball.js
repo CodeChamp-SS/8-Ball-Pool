@@ -444,7 +444,6 @@ export default class Scene_8BallPool extends Phaser.Scene {
                             }
                         }
                     }
-
                     this.noBallTouched = false
                 }
             });
