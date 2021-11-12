@@ -608,12 +608,8 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
             return
         }
         // console.log("not this player's turn")
-        //console.log("board changed called, newValue:", newValue)
         console.log(newValue.cueAngle, newValue.delAngle, newValue.hitSpeed, newValue.duration)
         // this.cue.setVisible(true)
-        // this.cue.setRotation(newValue.delAngle)
-        // this.matter.body.rotate(this.cue.body, newValue.cueAngle, this.matter.vector.create(ballPosition.x, ballPosition.y))
-        let context = this
 
         let ballPosition = this.cueBall.body.position
         let cuePosition = this.cue.body.position
@@ -622,39 +618,6 @@ export default class Scene_8BallPoolMulti extends Phaser.Scene {
         console.log(this.cue.body.position, this.cue.angle)
         let velocityVector = new Phaser.Math.Vector2(ballPosition.x - cuePosition.x, ballPosition.y - cuePosition.y)
         this.matter.applyForceFromAngle(this.cue.body, newValue.hitSpeed, velocityVector.angle())
-
-        // let start = performance.now()
-        // while (1) {
-        //     let end = performance.now();
-        //     let time = end - start;
-        //     if (time > newValue.duration) break;
-        //     console.log(time)
-        //     let v1 = new Phaser.Math.Vector2(this.cue.body.position)
-        //     v1.subtract(new Phaser.Math.Vector2(this.cueBall.body.position))
-        //     let velocityV = v1.normalize().scale(3)
-        //     // console.log("velocity set")
-        //     this.cue.setVelocity(velocityV.x, velocityV.y)
-        //     console.log(this.cue.body.position)
-        //     this.cue.setPosition(-240, 350)
-        // }
-
-        // var start = performance.now();
-
-
-        // let it = 0
-        // var timer_id = setInterval(function () {
-        //     if (performance.now() - start > newValue.duration) {
-        //         console.log(it)
-        //         clearInterval(timer_id);
-        //     } else {
-        //         let v1 = new Phaser.Math.Vector2(context.cue.body.position)
-        //         v1.subtract(new Phaser.Math.Vector2(context.cueBall.body.position))
-        //         let velocityV = v1.normalize().scale(3)
-        //         // console.log("velocity set")
-        //         context.cue.setVelocity(velocityV.x, velocityV.y)
-        //         ++it
-        //     }
-        // }, 1);
     }
 
     handleCuePositionChanged(newValue) {
