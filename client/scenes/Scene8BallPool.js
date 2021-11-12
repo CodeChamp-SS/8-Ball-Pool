@@ -157,13 +157,13 @@ export default class Scene_8BallPool extends Phaser.Scene {
         return pot
     }
 
-    createRacks(){
+    createRacks() {
         this.solidsRack = {}
         this.stripesRack = {}
-        this.add.rectangle(480,38 , 420, 50, 0x000000, 0.7)
+        this.add.rectangle(480, 38, 420, 50, 0x000000, 0.7)
         this.add.rectangle(1160, 38, 420, 50, 0x000000, 0.7)
-        for (let i = 0; i < 15; i++){
-            if (i < 7){
+        for (let i = 0; i < 15; i++) {
+            if (i < 7) {
                 let solidBall = this.matter.add.sprite(300 + 60 * i, 40, `ball_${i + 1}`)
                 solidBall.displayHeight = 40
                 solidBall.displayWidth = 40
@@ -174,7 +174,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 solidBall.setStatic(true)
                 this.solidsRack[this.balls[i].texture.key] = solidBall
             }
-            if (i > 7){
+            if (i > 7) {
                 let stripeBall = this.matter.add.sprite(500 + 60 * i, 40, `ball_${i + 1}`)
                 stripeBall.displayHeight = 40
                 stripeBall.displayWidth = 40
@@ -311,12 +311,12 @@ export default class Scene_8BallPool extends Phaser.Scene {
 
                         if (ball.texture.key === 'ball_8') {
                             if (playerGroup !== 'undefined') {
-                                if (playerGroup.length) {
-                                    console.log(`Player ${this.currentPlayer ^ 3} wins`)
-                                    console.log(`Player ${this.currentPlayer} loses`)
-                                } else {
+                                if ((playerGroup === 'this.solids' && this.solids.length === 0) || (playerGroup === 'this.stripes' && this.stripes.length === 0)) {
                                     console.log(`Player ${this.currentPlayer} wins`)
                                     console.log(`Player ${this.currentPlayer ^ 3} loses`)
+                                } else {
+                                    console.log(`Player ${this.currentPlayer ^ 3} wins`)
+                                    console.log(`Player ${this.currentPlayer} loses`)
                                 }
                                 this.gameOver()
                             } else {
@@ -365,12 +365,12 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         this.cushionTouchedAfterHittingBall = true
                         if (ball.texture.key === 'ball_8') {
                             if (playerGroup !== 'undefined') {
-                                if (playerGroup.length) {
-                                    console.log(`Player ${this.currentPlayer ^ 3} wins`)
-                                    console.log(`Player ${this.currentPlayer} loses`)
-                                } else {
+                                if ((playerGroup === 'this.solids' && this.solids.length === 0) || (playerGroup === 'this.stripes' && this.stripes.length === 0)) {
                                     console.log(`Player ${this.currentPlayer} wins`)
                                     console.log(`Player ${this.currentPlayer ^ 3} loses`)
+                                } else {
+                                    console.log(`Player ${this.currentPlayer ^ 3} wins`)
+                                    console.log(`Player ${this.currentPlayer} loses`)
                                 }
                                 this.gameOver()
                             } else {
