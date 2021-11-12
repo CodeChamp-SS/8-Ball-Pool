@@ -311,13 +311,21 @@ export default class Scene_8BallPool extends Phaser.Scene {
 
                         if (ball.texture.key === 'ball_8') {
                             if (playerGroup !== 'undefined') {
-                                if (playerGroup.length) {
+                                if ((playerGroup === 'this.solids' && this.solids.length === 0) || (playerGroup === 'this.stripes' && this.stripes.length === 0)){
+                                    console.log(`Player ${this.currentPlayer} wins`)
+                                    console.log(`Player ${this.currentPlayer ^ 3} loses`)
+                                }
+                                else{
+                                    console.log(`Player ${this.currentPlayer ^ 3} wins`)
+                                    console.log(`Player ${this.currentPlayer} loses`)
+                                }
+                                /*if (playerGroup.length) {
                                     console.log(`Player ${this.currentPlayer ^ 3} wins`)
                                     console.log(`Player ${this.currentPlayer} loses`)
                                 } else {
                                     console.log(`Player ${this.currentPlayer} wins`)
                                     console.log(`Player ${this.currentPlayer ^ 3} loses`)
-                                }
+                                }*/
                                 this.gameOver()
                             } else {
                                 this.replace8Ball = true
@@ -365,13 +373,21 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         this.cushionTouchedAfterHittingBall = true
                         if (ball.texture.key === 'ball_8') {
                             if (playerGroup !== 'undefined') {
-                                if (playerGroup.length) {
+                                if ((playerGroup === 'this.solids' && this.solids.length === 0) || (playerGroup === 'this.stripes' && this.stripes.length === 0)){
+                                    console.log(`Player ${this.currentPlayer} wins`)
+                                    console.log(`Player ${this.currentPlayer ^ 3} loses`)
+                                }
+                                else{
+                                    console.log(`Player ${this.currentPlayer ^ 3} wins`)
+                                    console.log(`Player ${this.currentPlayer} loses`)
+                                }
+                                /*if (playerGroup.length) {
                                     console.log(`Player ${this.currentPlayer ^ 3} wins`)
                                     console.log(`Player ${this.currentPlayer} loses`)
                                 } else {
                                     console.log(`Player ${this.currentPlayer} wins`)
                                     console.log(`Player ${this.currentPlayer ^ 3} loses`)
-                                }
+                                }*/
                                 this.gameOver()
                             } else {
                                 this.replace8Ball = true
@@ -406,10 +422,12 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 } else if (bodyA.collisionFilter.category === cushion1.body.collisionFilter.category || bodyB.collisionFilter.category === cushion1.body.collisionFilter.category) {
                     if (bodyA.collisionFilter.category === cushion1.body.collisionFilter.category) {
                         if (bodyB.collisionFilter.category !== this.cueBall.body.collisionFilter.category && !this.noBallTouched) {
+                            console.log('cushion')
                             this.cushionTouchedAfterHittingBall = true
                         }
                     } else {
                         if (bodyA.collisionFilter.category !== this.cueBall.body.collisionFilter.category && !this.noBallTouched) {
+                            console.log('cushion')
                             this.cushionTouchedAfterHittingBall = true
                         }
                     }
