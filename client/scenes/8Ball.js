@@ -456,6 +456,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
     }
 
     foulMade() {
+        //todo: add Foul msg on screen
         console.log("foul!!!")
         this.foul.play()
         this.cueBall.setVelocity(0, 0)

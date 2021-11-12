@@ -254,7 +254,6 @@ export default class Scene_LowestBallPool extends Phaser.Scene {
         this.noBallTouched = false
         this.noBallTouchedRest = true
         this.cushionTouchedAfterHittingBall = true
-        this.lowestBallHit = true
         this.currentPlayer = 1
         this.playerSwitched = true
         this.ballPotted = true
@@ -350,7 +349,7 @@ export default class Scene_LowestBallPool extends Phaser.Scene {
                     ballCollision.play()
                     this.lowestBall = this.balls[0]
                     this.key = this.lowestBall.texture.key
-                    
+
                     console.log(this.lowestBall.texture.key)
                     this.noBallTouched = false
                 }
@@ -365,6 +364,7 @@ export default class Scene_LowestBallPool extends Phaser.Scene {
     }
 
     foulMade() {
+        //todo: add Foul msg on screen
         console.log("foul!!!")
         this.foul.play()
         this.cueBall.setVelocity(0, 0)
@@ -459,7 +459,6 @@ export default class Scene_LowestBallPool extends Phaser.Scene {
                 this.noBallTouched = true
                 this.cushionTouchedAfterHittingBall = false
                 this.noBallTouchedRest = false
-                this.lowestBallHit = false
                 this.lowestBallPotted = false
             }
             this.graphics.clear()
