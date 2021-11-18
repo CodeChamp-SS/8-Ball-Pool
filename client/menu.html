@@ -4,36 +4,24 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>2D Pool</title>
+    <link rel="stylesheet" href="menu.css">
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js" defer></script>
+    <script src="https://unpkg.com/colyseus.js@^0.14.0/dist/colyseus.js" defer></script>
 </head>
 <body>
-<h1>
+<h1 class="game-header">
     2-D Pool
 </h1>
 <div class="game-settings">
-    <div class = "game-setting" id="setting-1">
-        <label>Guidelines</label>
-        <button class="guidelines-toggle-btn"></button>
-    </div>
-    <div class = "game-setting" id="setting-2">
-        <label>Sound</label>
-        <button class="sound-toggle-btn"></button>
-    </div>
-    <div class = "game-setting" id="setting-3">
-        <label>Profile</label>
-        <button class="profile-view-btn"></button>
-        <div class="profile-info"></div>
-    </div>
+    <button class="guidelines-toggle-btn set-btn" id="setting-1-btn">Guidelines</button>
+    <button class="sound-toggle-btn set-btn" id="setting-2-btn">Sound</button>
+    <button class="profile-view-btn set-btn" id="setting-3-btn">How To Play</button>
 </div>
-<select class="gameplay-modes">
-    <option class = "gameplay-mode" value="single-mode"> Single Player </option>
-    <option class = "gameplay-mode" value="multi-mode"> Multi Player </option>
-</select>
 <div class="game-modes">
-    <h2 class = "game-mode" id="mode-1"> 8-ball Pool </h2>
-    <h2 class = "game-mode" id="mode-2"> 9-ball Pool </h2>
-    <h2 class = "game-mode" id="mode-3"> Snooker </h2>
-    <h2 class = "game-mode" id="mode-4"> Cutthroat </h2>
+    <h2 class="game-mode" id="mode-1"> 8-ball Pool </h2>
+    <h2 class="game-mode" id="mode-2"> 9-ball Pool </h2>
+    <h2 class="game-mode" id="mode-3"> Lowest Ball First </h2>
 </div>
 </body>
 </html>
