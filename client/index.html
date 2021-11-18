@@ -1,16 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <style>
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Pool</title>
+    <link rel="stylesheet" href="index.css">
     <script src="//cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js" defer></script>
+    <script src="https://unpkg.com/colyseus.js@^0.14.0/dist/colyseus.js" defer></script>
 </head>
 <body>
-<script type="module" src="gameConfigs.js" defer></script>
+<h1 class="game-header">
+    2-D Pool
+</h1>
+<div class="game-settings">
+    <button class="guidelines-toggle-btn set-btn" id="setting-1-btn">Guidelines</button>
+    <button class="sound-toggle-btn set-btn" id="setting-2-btn">Sound</button>
+    <button class="profile-view-btn set-btn" id="setting-3-btn">How To Play</button>
+</div>
+<div class="game-modes">
+    <h2 class="game-mode" id="mode-1"> 8-ball Pool </h2>
+    <h2 class="game-mode" id="mode-2"> 9-ball Pool </h2>
+    <h2 class="game-mode" id="mode-3"> Lowest Ball First </h2>
+</div>
 </body>
 </html>
