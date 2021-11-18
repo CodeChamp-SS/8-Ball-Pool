@@ -1,6 +1,4 @@
-import Scene_8BallPool from './scenes/Scene8BallPool.js'
 import Scene_9BallPool from "./scenes/Scene9BallPool.js"
-import Scene_LowestBallPool from "./scenes/LowestBallPocketed.js";
 
 var config = {
     type: Phaser.AUTO,
