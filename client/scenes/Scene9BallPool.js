@@ -131,9 +131,9 @@ export default class Scene_9BallPool extends Phaser.Scene {
 
     createRack() {
         this.ballRack = {}
-        this.add.rectangle(420, 38, 550, 50, 0x000000, 0.7)
+        this.add.rectangle(400, 38, 550, 50, 0x000000, 0.7)
         for (let i = 0; i < 9; i++) {
-            let ball = this.matter.add.sprite(180 + 60 * i, 40, `ball_${i + 1}`)
+            let ball = this.matter.add.sprite(160 + 60 * i, 40, `ball_${i + 1}`)
             ball.displayHeight = 40
             ball.displayWidth = 40
             ball.setBody({
@@ -230,7 +230,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
         this.ballPotted = true
 
         const style = {font: '18px'}
-        this.turn = this.add.text(700, 0, "PLAYER 1's turn", style)
+        this.turn = this.add.text(800, 30, "PLAYER 1's turn", style)
 
         this.matter.world.on("collisionstart", (event) => {
             event.pairs.forEach((pair) => {

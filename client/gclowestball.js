@@ -1,5 +1,3 @@
-import Scene_8BallPool from './scenes/Scene8BallPool.js'
-import Scene_9BallPool from "./scenes/Scene9BallPool.js"
 import Scene_LowestBallPool from "./scenes/LowestBallPocketed.js";
 
 var config = {
@@ -17,7 +15,7 @@ var config = {
             debug: true
         }
     },
-    scene: [Scene_8BallPool, Scene_9BallPool],
+    scene: [Scene_LowestBallPool],
 };
 
 var game = new Phaser.Game(config);
