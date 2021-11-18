@@ -313,11 +313,13 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         if (ball.texture.key === 'ball_8') {
                             if (playerGroup !== 'undefined') {
                                 if ((playerGroup === 'this.solids' && this.solids.length === 0) || (playerGroup === 'this.stripes' && this.stripes.length === 0)) {
-                                    console.log(`Player ${this.currentPlayer} wins`)
-                                    console.log(`Player ${this.currentPlayer ^ 3} loses`)
+                                    alert(`Player ${this.currentPlayer} wins \nPlayer ${this.currentPlayer ^ 3} loses`)
+                                    // console.log(`Player ${this.currentPlayer} wins`)
+                                    // console.log(`Player ${this.currentPlayer ^ 3} loses`)
                                 } else {
-                                    console.log(`Player ${this.currentPlayer ^ 3} wins`)
-                                    console.log(`Player ${this.currentPlayer} loses`)
+                                    alert(`Player ${this.currentPlayer ^ 3} wins \nPlayer ${this.currentPlayer} loses`)
+                                    // console.log(`Player ${this.currentPlayer ^ 3} wins`)
+                                    // console.log(`Player ${this.currentPlayer} loses`)
                                 }
                                 this.gameOver()
                             } else {
@@ -372,11 +374,13 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         if (ball.texture.key === 'ball_8') {
                             if (playerGroup !== 'undefined') {
                                 if ((playerGroup === 'this.solids' && this.solids.length === 0) || (playerGroup === 'this.stripes' && this.stripes.length === 0)) {
-                                    console.log(`Player ${this.currentPlayer} wins`)
-                                    console.log(`Player ${this.currentPlayer ^ 3} loses`)
+                                    alert(`Player ${this.currentPlayer} wins \nPlayer ${this.currentPlayer ^ 3} loses`)
+                                    // console.log(`Player ${this.currentPlayer} wins`)
+                                    // console.log(`Player ${this.currentPlayer ^ 3} loses`)
                                 } else {
-                                    console.log(`Player ${this.currentPlayer ^ 3} wins`)
-                                    console.log(`Player ${this.currentPlayer} loses`)
+                                    alert(`Player ${this.currentPlayer ^ 3} wins \nPlayer ${this.currentPlayer} loses`)
+                                    // console.log(`Player ${this.currentPlayer ^ 3} wins`)
+                                    // console.log(`Player ${this.currentPlayer} loses`)
                                 }
                                 this.gameOver()
                             } else {
