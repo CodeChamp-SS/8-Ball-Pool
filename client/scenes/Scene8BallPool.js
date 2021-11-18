@@ -160,11 +160,11 @@ export default class Scene_8BallPool extends Phaser.Scene {
     createRacks() {
         this.solidsRack = {}
         this.stripesRack = {}
-        this.add.rectangle(480, 38, 420, 50, 0x000000, 0.7)
-        this.add.rectangle(1160, 38, 420, 50, 0x000000, 0.7)
+        this.add.rectangle(420, 38, 420, 50, 0x000000, 0.7)
+        this.add.rectangle(1050, 38, 420, 50, 0x000000, 0.7)
         for (let i = 0; i < 15; i++) {
             if (i < 7) {
-                let solidBall = this.matter.add.sprite(300 + 60 * i, 40, `ball_${i + 1}`)
+                let solidBall = this.matter.add.sprite(240 + 60 * i, 40, `ball_${i + 1}`)
                 solidBall.displayHeight = 40
                 solidBall.displayWidth = 40
                 solidBall.setBody({
@@ -175,7 +175,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 this.solidsRack[this.balls[i].texture.key] = solidBall
             }
             if (i > 7) {
-                let stripeBall = this.matter.add.sprite(500 + 60 * i, 40, `ball_${i + 1}`)
+                let stripeBall = this.matter.add.sprite(390 + 60 * i, 40, `ball_${i + 1}`)
                 stripeBall.displayHeight = 40
                 stripeBall.displayWidth = 40
                 stripeBall.setBody({
@@ -287,7 +287,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.numStripes = this.stripes.length
 
         const style = {font: '18px'}
-        this.turn = this.add.text(700, 0, "PLAYER 1's turn", style)
+        this.turn = this.add.text(650, 0, "PLAYER 1's turn", style)
 
         this.matter.world.on("collisionstart", (event) => {
             event.pairs.forEach((pair) => {
