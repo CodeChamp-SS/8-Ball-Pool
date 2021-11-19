@@ -34,7 +34,7 @@ $s2b.addEventListener('click', async function(e){
 
 const $s1b = document.getElementById('setting-1-btn')
 if($s1b)
-$s1b.addEventListener('click', async function(){
+$s1b.addEventListener('click', async function(e){
     globals.isGuideline = !globals.isGuideline;
     e.target.innerHTML = globals.isGuideline ? 'Guideline On' : 'Guideline Off';
     e.target.setAttribute('val', `${globals.isGuideline}`)
