@@ -1,3 +1,8 @@
+const globals = {
+    isAudio : localStorage.getItem('isAudio') === 'true',
+    isGuideline : localStorage.getItem('isGuideline') === 'true'
+}
+
 export default class Scene_8BallPool extends Phaser.Scene {
     constructor() {
         super("Scene_8BallPool");
@@ -75,6 +80,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
             'assets/cue.png',
             {frameWidth: 694, frameHeight: 20}
         );
+
         this.load.audio('ball_collision', ['assets/sounds/ball_collision.mp3'])
         this.load.audio('cushion_collision', ['assets/sounds/cushion_collision.mp3'])
         this.load.audio('foul', ['assets/sounds/foul.mp3'])
@@ -301,7 +307,8 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         let ball = bodyB.gameObject
                         console.log(bodyB.gameObject)
                         bodyB.gameObject.destroy()
-                        pocket.play()
+                        if(globals.isAudio) pocket.play()
+                        
                         let index = this.balls.indexOf(ball);
                         if (index !== -1) {
                             this.balls.splice(index, 1);
@@ -359,7 +366,8 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         let ball = bodyA.gameObject
                         console.log(bodyA.gameObject)
                         bodyA.gameObject.destroy()
-                        pocket.play()
+                        if(globals.isAudio) pocket.play()
+                        
                         let index = this.balls.indexOf(ball);
                         if (index !== -1) {
                             this.balls.splice(index, 1);
@@ -419,11 +427,14 @@ export default class Scene_8BallPool extends Phaser.Scene {
                             this.cushionTouchedAfterHittingBall = true
                         }
                     }
-                    cushionCollision.play()
+                    if(globals.isAudio) cushionCollision.play()
+                    
                 } else if (bodyA.collisionFilter.category === cueMask || bodyB.collisionFilter.category === cueMask) {
-                    cueCollisionStrong.play()
+                    if(globals.isAudio) cueCollisionStrong.play()
+                    
                 } else {
-                    ballCollision.play()
+                    if(globals.isAudio) ballCollision.play()
+                    
 
                     if (bodyA.collisionFilter.category === this.cueBall.body.collisionFilter.category) {
                         if (this.noBallTouched) {
@@ -464,7 +475,8 @@ export default class Scene_8BallPool extends Phaser.Scene {
 
     foulMade() {
         console.log("foul!!!")
-        this.foul.play()
+        if(globals.isAudio) this.foul.play()
+        
         this.cueBall.setVelocity(0, 0)
         this.cueBall.setToSleep().setInteractive().setVisible(false)
         this.cue.setToSleep()
@@ -484,7 +496,8 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.board.setOrigin(0, 0)
         this.board.displayWidth = this.sys.canvas.width
         this.board.displayHeight = this.sys.canvas.height
-        this.gameOverSound.play()
+        if(globals.isAudio) this.gameOverSound.play()
+        
     }
 
     startDrag(pointer, targets) {
@@ -515,7 +528,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         }
         this.graphics.clear()
         this.line = new Phaser.Geom.Line(ballPosition.x, ballPosition.y, ballPosition.x + 1200, ballPosition.y)
-        this.graphics.strokeLineShape(this.line)
+        if(globals.isGuideline) this.graphics.strokeLineShape(this.line)
         this.moveLine = true
         this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
     }
@@ -628,7 +641,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
                     this.helperLines.push(helperLineUp, helperLineDown)
                 }
                 // console.log(this.helperLines)
-                this.graphics.strokeLineShape(this.line)
+                if(globals.isGuideline) this.graphics.strokeLineShape(this.line)
                 this.moveLine = false
             }
             this.cue.setVisible(true)
@@ -640,7 +653,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 this.helperLines.forEach(helpLine => {
                     Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, -Math.PI / 360)
                 })
-                this.graphics.strokeLineShape(this.line)
+                if(globals.isGuideline) this.graphics.strokeLineShape(this.line)
             }
             this.matter.body.rotate(this.cue.body, -Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
         } else if (this.cursors.right.isDown) {
@@ -649,7 +662,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 this.helperLines.forEach(helpLine => {
                     Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, Math.PI / 360)
                 })
-                this.graphics.strokeLineShape(this.line)
+                if(globals.isGuideline) this.graphics.strokeLineShape(this.line)
             }
             this.matter.body.rotate(this.cue.body, Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
         }
@@ -680,7 +693,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
             this.line.x2 = centre[0]
             this.line.y2 = centre[1]
             this.guideCircle = new Phaser.Geom.Circle(centre[0], centre[1], 15)
-            this.graphics.strokeLineShape(this.line)
+            if(globals.isGuideline) this.graphics.strokeLineShape(this.line)
             this.graphics.strokeLineShape(centreLine)
             this.graphics.strokeCircle(this.guideCircle.x, this.guideCircle.y, this.guideCircle.radius)
         }
