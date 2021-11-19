@@ -166,11 +166,11 @@ export default class Scene_8BallPool extends Phaser.Scene {
     createRacks() {
         this.solidsRack = {}
         this.stripesRack = {}
-        this.add.rectangle(480, 38, 420, 50, 0x000000, 0.7)
-        this.add.rectangle(1160, 38, 420, 50, 0x000000, 0.7)
+        this.add.rectangle(420, 38, 420, 50, 0x000000, 0.7)
+        this.add.rectangle(1050, 38, 420, 50, 0x000000, 0.7)
         for (let i = 0; i < 15; i++) {
             if (i < 7) {
-                let solidBall = this.matter.add.sprite(300 + 60 * i, 40, `ball_${i + 1}`)
+                let solidBall = this.matter.add.sprite(240 + 60 * i, 40, `ball_${i + 1}`)
                 solidBall.displayHeight = 40
                 solidBall.displayWidth = 40
                 solidBall.setBody({
@@ -181,7 +181,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 this.solidsRack[this.balls[i].texture.key] = solidBall
             }
             if (i > 7) {
-                let stripeBall = this.matter.add.sprite(500 + 60 * i, 40, `ball_${i + 1}`)
+                let stripeBall = this.matter.add.sprite(390 + 60 * i, 40, `ball_${i + 1}`)
                 stripeBall.displayHeight = 40
                 stripeBall.displayWidth = 40
                 stripeBall.setBody({
@@ -288,12 +288,13 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.currentPlayer = 1
         this.playerSwitched = true
         this.playerBalls = {}
+        this.cueBallPotted = false
 
         this.numSolids = this.solids.length
         this.numStripes = this.stripes.length
 
         const style = {font: '18px'}
-        this.turn = this.add.text(700, 0, "PLAYER 1's turn", style)
+        this.turn = this.add.text(650, 0, "PLAYER 1's turn", style)
 
         this.matter.world.on("collisionstart", (event) => {
             event.pairs.forEach((pair) => {
@@ -319,11 +320,13 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         if (ball.texture.key === 'ball_8') {
                             if (playerGroup !== 'undefined') {
                                 if ((playerGroup === 'this.solids' && this.solids.length === 0) || (playerGroup === 'this.stripes' && this.stripes.length === 0)) {
-                                    console.log(`Player ${this.currentPlayer} wins`)
-                                    console.log(`Player ${this.currentPlayer ^ 3} loses`)
+                                    alert(`Player ${this.currentPlayer} wins \nPlayer ${this.currentPlayer ^ 3} loses`)
+                                    // console.log(`Player ${this.currentPlayer} wins`)
+                                    // console.log(`Player ${this.currentPlayer ^ 3} loses`)
                                 } else {
-                                    console.log(`Player ${this.currentPlayer ^ 3} wins`)
-                                    console.log(`Player ${this.currentPlayer} loses`)
+                                    alert(`Player ${this.currentPlayer ^ 3} wins \nPlayer ${this.currentPlayer} loses`)
+                                    // console.log(`Player ${this.currentPlayer ^ 3} wins`)
+                                    // console.log(`Player ${this.currentPlayer} loses`)
                                 }
                                 this.gameOver()
                             } else {
@@ -359,6 +362,8 @@ export default class Scene_8BallPool extends Phaser.Scene {
                             console.log(this.stripes)
                         }
                     } else {
+                        // this.currentPlayer ^= 3
+                        this.cueBallPotted = true
                         this.foulMade()
                     }
                 } else if (bodyB.collisionFilter.category === potCategory) {
@@ -377,11 +382,13 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         if (ball.texture.key === 'ball_8') {
                             if (playerGroup !== 'undefined') {
                                 if ((playerGroup === 'this.solids' && this.solids.length === 0) || (playerGroup === 'this.stripes' && this.stripes.length === 0)) {
-                                    console.log(`Player ${this.currentPlayer} wins`)
-                                    console.log(`Player ${this.currentPlayer ^ 3} loses`)
+                                    alert(`Player ${this.currentPlayer} wins \nPlayer ${this.currentPlayer ^ 3} loses`)
+                                    // console.log(`Player ${this.currentPlayer} wins`)
+                                    // console.log(`Player ${this.currentPlayer ^ 3} loses`)
                                 } else {
-                                    console.log(`Player ${this.currentPlayer ^ 3} wins`)
-                                    console.log(`Player ${this.currentPlayer} loses`)
+                                    alert(`Player ${this.currentPlayer ^ 3} wins \nPlayer ${this.currentPlayer} loses`)
+                                    // console.log(`Player ${this.currentPlayer ^ 3} wins`)
+                                    // console.log(`Player ${this.currentPlayer} loses`)
                                 }
                                 this.gameOver()
                             } else {
@@ -415,15 +422,19 @@ export default class Scene_8BallPool extends Phaser.Scene {
                             console.log(this.stripes)
                         }
                     } else {
+                        // this.currentPlayer ^= 3
+                        this.cueBallPotted = true
                         this.foulMade()
                     }
                 } else if (bodyA.collisionFilter.category === cushion1.body.collisionFilter.category || bodyB.collisionFilter.category === cushion1.body.collisionFilter.category) {
                     if (bodyA.collisionFilter.category === cushion1.body.collisionFilter.category) {
                         if (bodyB.collisionFilter.category !== this.cueBall.body.collisionFilter.category && !this.noBallTouched) {
+                            console.log('cushion')
                             this.cushionTouchedAfterHittingBall = true
                         }
                     } else {
                         if (bodyA.collisionFilter.category !== this.cueBall.body.collisionFilter.category && !this.noBallTouched) {
+                            console.log('cushion')
                             this.cushionTouchedAfterHittingBall = true
                         }
                     }
@@ -487,6 +498,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         }
         this.correctBallPotted = false
         this.noBallTouched = false
+        this.cueBallPotted = false
     }
 
     gameOver() {
@@ -601,7 +613,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
 
             // console.log('Player ', this.currentPlayer, this.playerSwitched)
 
-            if (this.noBallTouched || !this.cushionTouchedAfterHittingBall || !this.correctCategoryBallHit) {
+            if (this.noBallTouched || !this.cushionTouchedAfterHittingBall || !this.correctCategoryBallHit || this.cueBallPotted) {
                 this.foulMade()
                 if (this.gameStarted) this.breakShot = true
                 this.noBallTouched = false
