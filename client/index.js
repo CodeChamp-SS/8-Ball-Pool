@@ -9,17 +9,17 @@ const $m3 = document.getElementById('mode-3')
 
 if($m1)
 $m1.addEventListener('click', function(){
-    location.assign('/client/index8ballpool.html')
+    location.assign('index8ballpool.html')
 })
 
 if($m2)
 $m2.addEventListener('click', function(){
-    location.assign('/client/index9ballpool.html')
+    location.assign('index9ballpool.html')
 })
 
 if($m3)
 $m3.addEventListener('click', function(){
-    location.assign('/client/indexlowestball.html')
+    location.assign('indexlowestball.html')
 })
 
 const $s2b = document.getElementById('setting-2-btn')
@@ -58,7 +58,7 @@ span.onclick = function() {
 }
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
-  if (event.target == modal) {
+  if (event.target === modal) {
     modal.style.display = "none";
   }
 }
