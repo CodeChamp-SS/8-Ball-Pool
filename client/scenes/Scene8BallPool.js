@@ -1,6 +1,6 @@
 const globals = {
-    isAudio : localStorage.getItem('isAudio') === 'true',
-    isGuideline : localStorage.getItem('isGuideline') === 'true'
+    isAudio: localStorage.getItem('isAudio') === 'true',
+    isGuideline: localStorage.getItem('isGuideline') === 'true'
 }
 
 export default class Scene_8BallPool extends Phaser.Scene {
@@ -166,11 +166,11 @@ export default class Scene_8BallPool extends Phaser.Scene {
     createRacks() {
         this.solidsRack = {}
         this.stripesRack = {}
-        this.add.rectangle(420, 38, 420, 50, 0x000000, 0.7)
-        this.add.rectangle(1050, 38, 420, 50, 0x000000, 0.7)
+        this.add.rectangle(480, 38, 420, 50, 0x000000, 0.7)
+        this.add.rectangle(1160, 38, 420, 50, 0x000000, 0.7)
         for (let i = 0; i < 15; i++) {
             if (i < 7) {
-                let solidBall = this.matter.add.sprite(240 + 60 * i, 40, `ball_${i + 1}`)
+                let solidBall = this.matter.add.sprite(300 + 60 * i, 40, `ball_${i + 1}`)
                 solidBall.displayHeight = 40
                 solidBall.displayWidth = 40
                 solidBall.setBody({
@@ -181,7 +181,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 this.solidsRack[this.balls[i].texture.key] = solidBall
             }
             if (i > 7) {
-                let stripeBall = this.matter.add.sprite(390 + 60 * i, 40, `ball_${i + 1}`)
+                let stripeBall = this.matter.add.sprite(500 + 60 * i, 40, `ball_${i + 1}`)
                 stripeBall.displayHeight = 40
                 stripeBall.displayWidth = 40
                 stripeBall.setBody({
@@ -308,8 +308,8 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         let ball = bodyB.gameObject
                         console.log(bodyB.gameObject)
                         bodyB.gameObject.destroy()
-                        if(globals.isAudio) pocket.play()
-                        
+                        if (globals.isAudio) pocket.play()
+
                         let index = this.balls.indexOf(ball);
                         if (index !== -1) {
                             this.balls.splice(index, 1);
@@ -371,8 +371,8 @@ export default class Scene_8BallPool extends Phaser.Scene {
                         let ball = bodyA.gameObject
                         console.log(bodyA.gameObject)
                         bodyA.gameObject.destroy()
-                        if(globals.isAudio) pocket.play()
-                        
+                        if (globals.isAudio) pocket.play()
+
                         let index = this.balls.indexOf(ball);
                         if (index !== -1) {
                             this.balls.splice(index, 1);
@@ -438,14 +438,14 @@ export default class Scene_8BallPool extends Phaser.Scene {
                             this.cushionTouchedAfterHittingBall = true
                         }
                     }
-                    if(globals.isAudio) cushionCollision.play()
-                    
+                    if (globals.isAudio) cushionCollision.play()
+
                 } else if (bodyA.collisionFilter.category === cueMask || bodyB.collisionFilter.category === cueMask) {
-                    if(globals.isAudio) cueCollisionStrong.play()
-                    
+                    if (globals.isAudio) cueCollisionStrong.play()
+
                 } else {
-                    if(globals.isAudio) ballCollision.play()
-                    
+                    if (globals.isAudio) ballCollision.play()
+
 
                     if (bodyA.collisionFilter.category === this.cueBall.body.collisionFilter.category) {
                         if (this.noBallTouched) {
@@ -486,8 +486,8 @@ export default class Scene_8BallPool extends Phaser.Scene {
 
     foulMade() {
         console.log("foul!!!")
-        if(globals.isAudio) this.foul.play()
-        
+        if (globals.isAudio) this.foul.play()
+
         this.cueBall.setVelocity(0, 0)
         this.cueBall.setToSleep().setInteractive().setVisible(false)
         this.cue.setToSleep()
@@ -508,8 +508,8 @@ export default class Scene_8BallPool extends Phaser.Scene {
         this.board.setOrigin(0, 0)
         this.board.displayWidth = this.sys.canvas.width
         this.board.displayHeight = this.sys.canvas.height
-        if(globals.isAudio) this.gameOverSound.play()
-        
+        if (globals.isAudio) this.gameOverSound.play()
+
     }
 
     startDrag(pointer, targets) {
@@ -540,7 +540,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
         }
         this.graphics.clear()
         this.line = new Phaser.Geom.Line(ballPosition.x, ballPosition.y, ballPosition.x + 1200, ballPosition.y)
-        if(globals.isGuideline) this.graphics.strokeLineShape(this.line)
+        if (globals.isGuideline) this.graphics.strokeLineShape(this.line)
         this.moveLine = true
         this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
     }
@@ -653,7 +653,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
                     this.helperLines.push(helperLineUp, helperLineDown)
                 }
                 // console.log(this.helperLines)
-                if(globals.isGuideline) this.graphics.strokeLineShape(this.line)
+                if (globals.isGuideline) this.graphics.strokeLineShape(this.line)
                 this.moveLine = false
             }
             this.cue.setVisible(true)
@@ -665,7 +665,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 this.helperLines.forEach(helpLine => {
                     Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, -Math.PI / 360)
                 })
-                if(globals.isGuideline) this.graphics.strokeLineShape(this.line)
+                if (globals.isGuideline) this.graphics.strokeLineShape(this.line)
             }
             this.matter.body.rotate(this.cue.body, -Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
         } else if (this.cursors.right.isDown) {
@@ -674,7 +674,7 @@ export default class Scene_8BallPool extends Phaser.Scene {
                 this.helperLines.forEach(helpLine => {
                     Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, Math.PI / 360)
                 })
-                if(globals.isGuideline) this.graphics.strokeLineShape(this.line)
+                if (globals.isGuideline) this.graphics.strokeLineShape(this.line)
             }
             this.matter.body.rotate(this.cue.body, Math.PI / 360, this.matter.vector.create(ballPosition.x, ballPosition.y))
         }
@@ -705,9 +705,11 @@ export default class Scene_8BallPool extends Phaser.Scene {
             this.line.x2 = centre[0]
             this.line.y2 = centre[1]
             this.guideCircle = new Phaser.Geom.Circle(centre[0], centre[1], 15)
-            if(globals.isGuideline) this.graphics.strokeLineShape(this.line)
-            this.graphics.strokeLineShape(centreLine)
-            this.graphics.strokeCircle(this.guideCircle.x, this.guideCircle.y, this.guideCircle.radius)
+            if (globals.isGuideline) {
+                this.graphics.strokeLineShape(this.line)
+                this.graphics.strokeLineShape(centreLine)
+                this.graphics.strokeCircle(this.guideCircle.x, this.guideCircle.y, this.guideCircle.radius)
+            }
         }
 
         if (this.cursors.down.isDown) {

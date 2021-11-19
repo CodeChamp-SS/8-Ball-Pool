@@ -1,6 +1,6 @@
 const globals = {
-    isAudio : localStorage.getItem('isAudio') === 'true',
-    isGuideline : localStorage.getItem('isGuideline') === 'true'
+    isAudio: localStorage.getItem('isAudio') === 'true',
+    isGuideline: localStorage.getItem('isGuideline') === 'true'
 }
 
 export default class Scene_9BallPool extends Phaser.Scene {
@@ -244,12 +244,13 @@ export default class Scene_9BallPool extends Phaser.Scene {
                 if (bodyA.collisionFilter.category === potMask) {
                     if (bodyB.collisionFilter.category !== this.cueBall.body.collisionFilter.category) {
                         this.ballPotted = true
-                        if(globals.isAudio) pocket.play()
+                        if (globals.isAudio) pocket.play()
                         let ball = bodyB.gameObject
                         console.log(bodyB.gameObject)
                         if (ball.texture.key === 'ball_9') {
                             if (this.lowestBallHit) {
                                 //game over, player wins if shot was legit
+                                alert(`Player ${this.currentPlayer} wins \nPlayer ${this.currentPlayer ^ 3} loses`)
                                 console.log(`Player ${this.currentPlayer} wins`)
                                 console.log(`Player ${this.currentPlayer ^ 3} loses`)
                                 this.gameOver()
@@ -270,12 +271,13 @@ export default class Scene_9BallPool extends Phaser.Scene {
                 } else if (bodyB.collisionFilter.category === potMask) {
                     if (bodyA.collisionFilter.category !== this.cueBall.body.collisionFilter.category) {
                         this.ballPotted = true
-                        if(globals.isAudio) pocket.play()
+                        if (globals.isAudio) pocket.play()
                         let ball = bodyA.gameObject
                         console.log(bodyA.gameObject)
                         if (ball.texture.key === 'ball_9') {
                             if (this.lowestBallHit) {
                                 //game over, player wins if shot was legit
+                                alert(`Player ${this.currentPlayer} wins \nPlayer ${this.currentPlayer ^ 3} loses`)
                                 console.log(`Player ${this.currentPlayer} wins`)
                                 console.log(`Player ${this.currentPlayer ^ 3} loses`)
                                 this.gameOver()
@@ -307,13 +309,13 @@ export default class Scene_9BallPool extends Phaser.Scene {
                             console.log('cushion touched')
                         }
                     }
-                    if(globals.isAudio) cushionCollision.play()
+                    if (globals.isAudio) cushionCollision.play()
                 } else if (bodyA.collisionFilter.category === cueMask || bodyB.collisionFilter.category === cueMask) {
                     //collision of cue with cue ball
-                    if(globals.isAudio) cueCollisionStrong.play()
+                    if (globals.isAudio) cueCollisionStrong.play()
                 } else {
                     //cue ball to object ball
-                    if(globals.isAudio) ballCollision.play()
+                    if (globals.isAudio) ballCollision.play()
                     let lowestBall = this.balls[0]
                     // console.log(lowestBall)
 
@@ -343,7 +345,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
 
     foulMade() {
         console.log("foul!!!")
-        if(globals.isAudio) this.foul.play()
+        if (globals.isAudio) this.foul.play()
         this.cueBall.setVelocity(0, 0)
         this.cueBall.setToSleep().setInteractive().setVisible(false)
         this.cue.setToSleep()
@@ -370,7 +372,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
         this.board.setOrigin(0, 0)
         this.board.displayWidth = this.sys.canvas.width
         this.board.displayHeight = this.sys.canvas.height
-        if(globals.isAudio) this.gameOverSound.play()
+        if (globals.isAudio) this.gameOverSound.play()
         console.log("Game over, player wins")
     }
 
@@ -402,7 +404,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
         }
         this.graphics.clear()
         this.line = new Phaser.Geom.Line(ballPosition.x, ballPosition.y, ballPosition.x + 1200, ballPosition.y)
-        if(globals.isGuideline) this.graphics.strokeLineShape(this.line)
+        if (globals.isGuideline) this.graphics.strokeLineShape(this.line)
         this.moveLine = true
         this.matter.body.setPosition(this.cue.body, this.matter.vector.create(ballPosition.x - 410, ballPosition.y))
     }
@@ -446,10 +448,10 @@ export default class Scene_9BallPool extends Phaser.Scene {
             this.playerSwitched = false
         } else {
             // this.lowestBallHit = false
-            this.turn.text = `PLAYER ${this.currentPlayer}'s turn`
+            // this.turn.text = `PLAYER ${this.currentPlayer}'s turn`
             this.cue.setCollidesWith([this.cueBallCategory])
             if (!this.playerSwitched) {
-                console.log("Player Switched", this.correctBallPotted)
+                // console.log("Player Switched", this.correctBallPotted)
                 this.currentPlayer ^= 3
             }
             if (this.noBallTouched || !this.cushionTouchedAfterHittingBall || !this.lowestBallHit) {
@@ -492,7 +494,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
                     this.helperLines.push(helperLineUp, helperLineDown)
                 }
                 // console.log(this.helperLines)
-                if(globals.isGuideline) this.graphics.strokeLineShape(this.line)
+                if (globals.isGuideline) this.graphics.strokeLineShape(this.line)
                 this.moveLine = false
             }
             this.cue.setVisible(true)
@@ -505,7 +507,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
                 this.helperLines.forEach(helpLine => {
                     Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, -Math.PI / 270)
                 })
-                if(globals.isGuideline) this.graphics.strokeLineShape(this.line)
+                if (globals.isGuideline) this.graphics.strokeLineShape(this.line)
             }
             this.matter.body.rotate(this.cue.body, -Math.PI / 270, this.matter.vector.create(ballPosition.x, ballPosition.y))
         } else if (this.cursors.right.isDown) {
@@ -514,7 +516,7 @@ export default class Scene_9BallPool extends Phaser.Scene {
                 this.helperLines.forEach(helpLine => {
                     Phaser.Geom.Line.RotateAroundXY(helpLine, ballPosition.x, ballPosition.y, Math.PI / 270)
                 })
-                if(globals.isGuideline) this.graphics.strokeLineShape(this.line)
+                if (globals.isGuideline) this.graphics.strokeLineShape(this.line)
             }
             this.matter.body.rotate(this.cue.body, Math.PI / 270, this.matter.vector.create(ballPosition.x, ballPosition.y))
         }
@@ -539,7 +541,6 @@ export default class Scene_9BallPool extends Phaser.Scene {
 
         if (pt !== undefined) {
             this.graphics.clear()
-            this.graphics.fillPoint(pt.x, pt.y, 3)
 
             let centreLine = new Phaser.Geom.Line(pt.x, pt.y, circleCentre[0], circleCentre[1])
             Phaser.Geom.Line.Extend(centreLine, -22.5, 50)
@@ -550,9 +551,11 @@ export default class Scene_9BallPool extends Phaser.Scene {
             this.line.y2 = centre[1]
             this.guideCircle = new Phaser.Geom.Circle(centre[0], centre[1], 15)
 
-            if(globals.isGuideline) this.graphics.strokeLineShape(this.line)
-            this.graphics.strokeLineShape(centreLine)
-            this.graphics.strokeCircle(this.guideCircle.x, this.guideCircle.y, this.guideCircle.radius)
+            if (globals.isGuideline) {
+                this.graphics.strokeLineShape(this.line)
+                this.graphics.strokeLineShape(centreLine)
+                this.graphics.strokeCircle(this.guideCircle.x, this.guideCircle.y, this.guideCircle.radius)
+            }
         }
 
         if (this.cursors.down.isDown) {
